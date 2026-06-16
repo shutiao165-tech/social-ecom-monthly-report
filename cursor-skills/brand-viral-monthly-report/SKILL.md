@@ -11,6 +11,11 @@ description: >-
 
 **开源的是架构与模型**，不是某一品类或某一品牌的数据。所有业务配置在 `config/niche_config.py`。
 
+## 文档
+
+- **人类可读**：[docs/USAGE.md](../../docs/USAGE.md)（入门）、[docs/WORKFLOW.md](../../docs/WORKFLOW.md)（流水线）
+- **配置字段**：[config/README.md](../../config/README.md)
+
 ## 仓库
 
 - https://github.com/shutiao165-tech/social-ecom-monthly-report

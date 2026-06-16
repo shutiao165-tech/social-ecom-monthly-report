@@ -9,23 +9,35 @@
 
 ---
 
+## 文档（建议先看）
+
+| 文档 | 适合 |
+|------|------|
+| **[docs/USAGE.md](docs/USAGE.md)** | 第一次用、每月重跑、报告怎么读、FAQ |
+| [docs/WORKFLOW.md](docs/WORKFLOW.md) | 流水线逐步说明、文件落在哪 |
+| [docs/SETUP.md](docs/SETUP.md) | TikHub / decoder 安装 |
+| [config/README.md](config/README.md) | 配置字段说明 |
+
+**看不懂从哪下手？** → 打开 [docs/USAGE.md](docs/USAGE.md)，按「第一次使用 5 步」走一遍。
+
+---
+
+## 这仓库解决什么问题？
+
+| 你想知道… | 报告里看… |
+|-----------|-----------|
+| 赛道什么内容在火？ | 品类池趋势榜 / 殿堂榜 |
+| 竞品在发什么、挂不挂车？ | §02 竞品动作板 |
+| 自有品牌该不该跟、推什么 SKU？ | §03 机会矩阵 + scene_links |
+
+---
+
 ## 模型概览（方案 C）
 
 ```
-┌─────────────────┐     ┌─────────────────┐
-│   品类池        │     │   品牌池        │
-│ CATEGORY_KEYWORDS│     │ BRAND_SEARCH_*  │
-│ 每词 TOP30      │     │ 每品牌 TOP3–5   │
-└────────┬────────┘     └────────┬────────┘
-         │                       │
-         └───────────┬───────────┘
-                     ▼
-            enrich_commerce（挂品/挂车）
-                     ▼
-         merge + build_unified_monthly
-                     ▼
-              monthly-report.html
-         （竞品板 · 机会矩阵 · scene_links）
+品类池 (CATEGORY_KEYWORDS)  ─┐
+                              ├→ 商业复核 → 汇总 → monthly-report.html
+品牌池 (BRAND_SEARCH_*)     ─┘
 ```
 
 | 层级 | 说明 |
@@ -37,7 +49,7 @@
 
 ---
 
-## 快速开始
+## 快速开始（极简版）
 
 ```bash
 git clone https://github.com/shutiao165-tech/social-ecom-monthly-report.git ~/brand-viral-monthly-report
@@ -46,11 +58,11 @@ cd ~/brand-viral-monthly-report
 cp config/niche_config.example.py config/niche_config.py
 # 编辑 config/niche_config.py
 
-mkdir -p ~/.config/tikhub
-echo "YOUR_TIKHUB_KEY" > ~/.config/tikhub/key
+mkdir -p ~/.config/tikhub && echo "YOUR_TIKHUB_KEY" > ~/.config/tikhub/key
+export SOCIAL_ECOM_DECODER=~/.claude/skills/social-ecom-decoder
 
-export SOCIAL_ECOM_DECODER=~/.claude/skills/social-ecom-decoder  # douyin-pulse 上游
-
+# ① 在上游跑 douyin-pulse（品类 + 品牌）— 见 docs/USAGE.md 第 3 步
+# ② 再跑本仓库流水线：
 bash scripts/run_monthly_pipeline.sh
 open monthly-report.html
 ```
@@ -64,23 +76,16 @@ cp -R cursor-skills/brand-viral-monthly-report ~/.cursor/skills/
 
 ---
 
-## 你需要改的唯一文件
-
-`config/niche_config.py`（从 example 复制）—— 赛道名、自有品牌、竞品、品类词、分类规则、playbook、报告文案。
-
-详见 [config/README.md](config/README.md) 与 [docs/SETUP.md](docs/SETUP.md)。
-
----
-
 ## 目录
 
 | 路径 | 作用 |
 |------|------|
-| `config/niche_config.example.py` | 配置模板（占位品牌 BrandAlpha / CompetitorB…） |
-| `scripts/brand_config.py` | 配置加载出口（勿手改列表） |
-| `scripts/build_unified_monthly.py` | 汇总 DATA、patch HTML |
-| `monthly-report.html` | 报告壳（DATA 由 pipeline 写入） |
-| `cursor-skills/` | 复制到 `~/.cursor/skills/` |
+| `config/niche_config.example.py` | 配置模板 |
+| `config/niche_config.py` | 你的配置（不提交 Git） |
+| `scripts/run_monthly_pipeline.sh` | 一键流水线 |
+| `monthly-report.html` | 报告输出 |
+| `docs/` | 使用说明与流程 |
+| `cursor-skills/` | Cursor Agent Skill |
 
 ---
 
@@ -93,6 +98,6 @@ cp -R cursor-skills/brand-viral-monthly-report ~/.cursor/skills/
 
 ## 相关
 
-- [dingtalk-stock-watch](https://github.com/shutiao165-tech/dingtalk-stock-watch) — 同类开源范式（盯盘助手）
+- [dingtalk-stock-watch](https://github.com/shutiao165-tech/dingtalk-stock-watch) — 同类开源范式
 
 MIT — [LICENSE](LICENSE)
