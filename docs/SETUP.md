@@ -10,6 +10,9 @@ cp config/niche_config.example.py config/niche_config.py
 
 ## 2. TikHub
 
+还没有账号？推荐注册（推荐码 `YS1mhMDA`）：  
+https://user.tikhub.io/register?ref=YS1mhMDA
+
 ```bash
 mkdir -p ~/.config/tikhub
 echo "sk-xxxxxxxx" > ~/.config/tikhub/key
