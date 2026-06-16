@@ -1,7 +1,11 @@
 # 小红书 × 抖音 · 品牌内容爆款月报
 
-> 作者：[shutiao165-tech](https://github.com/shutiao165-tech)  
-> 仓库：https://github.com/shutiao165-tech/social-ecom-monthly-report
+> **📖 使用说明（从这里开始）**  
+> • [docs/USAGE.md](docs/USAGE.md) — 第一次怎么用、每月重跑、报告怎么读  
+> • [docs/WORKFLOW.md](docs/WORKFLOW.md) — 流水线逐步说明  
+> • [config/README.md](config/README.md) — 配置 `niche_config.py` 填什么  
+
+> 作者：[shutiao165-tech](https://github.com/shutiao165-tech) · 仓库：https://github.com/shutiao165-tech/social-ecom-monthly-report
 
 **架构与模型开源**：用 TikHub + 双池采集（品类词 + 品牌词），输出单文件 `monthly-report.html`——趋势榜、竞品动作板、机会矩阵、scene_links。
 
