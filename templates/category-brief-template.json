@@ -1,0 +1,36 @@
+[
+  {
+    "product": "【必填·唯一键】商品简称，与话题映射表、SKU索引表 product 字段完全一致",
+    "category": "【必填】品类名，如：家清 / 零食 / 宠物",
+    "series": "【选填】系列名，如：香氛洁厕系列",
+    "spuid": "【必填】SPU ID，纯数字；暂无填「待补」",
+    "nickname": "【选填】内部昵称/简称，如：双舱袋",
+    "product_name": "【必填】对外全名，可与 product 相同",
+    "tagline": "【必填】一句话卖点，8–20 字",
+    "pain": "【必填】用户痛点，1–2 句",
+    "sell_points": [
+      "卖点 1：成分/功效/数据",
+      "卖点 2：差异化造型或体验",
+      "卖点 3：场景/人群",
+      "卖点 4：价格带或竞品对比（可选）",
+      "卖点 5（可选）"
+    ],
+    "skus": [
+      {
+        "variant": "香型或规格名，如：极地雪松300g",
+        "sku": "SKU 编码，如：302298275"
+      }
+    ],
+    "doc_title": "【选填】飞书信息同步文档标题",
+    "docs": [
+      {
+        "id": "【选填】飞书 wiki/docx token",
+        "title": "文档标题",
+        "url": "https://your-feishu-domain.feishu.cn/wiki/xxxxxxxx"
+      }
+    ],
+    "priority": true,
+    "source": "category-brief-YYYY-MM",
+    "maintainer": "【选填】填写人姓名"
+  }
+]

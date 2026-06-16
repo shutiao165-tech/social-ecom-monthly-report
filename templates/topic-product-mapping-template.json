@@ -1,0 +1,25 @@
+{
+  "_说明": "月报 §07「本月建议方向」用：爆款话题 → 推荐带货 SKU。topic_id 由技术侧定，商品名必须与 category-brief 的 product 字段完全一致。",
+  "category": "【必填】品类名，如：零食",
+  "mappings": [
+    {
+      "topic_id": "snack_crispy",
+      "topic_label": "【给人看】话题名，如：低卡脆片种草",
+      "trigger_keywords": "【选填】触发词，逗号分隔，如：魔芋,脆片,解馋",
+      "products": [
+        "商品简称 A（与 brief 表 product 一致）",
+        "商品简称 B"
+      ],
+      "content_hint": "【选填】内容方向提示，如：对比测评 / 办公室零食 / 减脂替代"
+    },
+    {
+      "topic_id": "snack_nuts",
+      "topic_label": "每日坚果礼盒",
+      "trigger_keywords": "坚果,礼盒,年货",
+      "products": [
+        "商品简称 C"
+      ],
+      "content_hint": "送礼场景 + 成分表特写"
+    }
+  ]
+}

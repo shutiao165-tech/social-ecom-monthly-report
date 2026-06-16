@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家清爆款月报 · 双平台一体化</title>
+<style>
+:root{
+  /* 🌿 森林墨配色，呼应翻页演讲版 */
+  --ink:#1a2e1f;
+  --ink-soft:#253d2c;
+  --ink-rgb:26,46,31;
+  --paper:#f5f1e8;
+  --paper-tint:#ece7da;
+  --paper-tint2:#e2dccc;
+  --paper-rgb:245,241,232;
+
+  --xhs:#d63956;
+  --xhs-soft:#fff1f3;
+  --dy:#2d6a4f;
+  --dy-soft:#f0f7f3;
+  --accent:#b8860b;
+  --muted:#7a8478;
+  --rule:rgba(26,46,31,.12);
+
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --serif-zh:"Songti SC","STSong",SimSun,serif;
+  --serif-en:Georgia,"Times New Roman",serif;
+  --sans-zh:"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans-zh);background:var(--paper);color:var(--ink);line-height:1.7;font-size:14px;-webkit-font-smoothing:antialiased}
+
+.layout{display:flex;min-height:100vh}
+
+/* ============ 侧边栏 ============ */
+.sidebar{width:240px;background:var(--ink);color:var(--paper);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar-head{padding:24px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-head .mono{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(245,241,232,.45);margin-bottom:8px}
+.sidebar-head h2{font-family:var(--serif-zh);font-weight:700;font-size:18px;letter-spacing:.02em;line-height:1.3;color:var(--paper)}
+.sidebar-head .sub{font-size:11px;color:rgba(245,241,232,.5);margin-top:6px;font-family:var(--mono);letter-spacing:.1em}
+
+.nav{padding:14px 0;flex:1}
+.nav-group{padding:18px 22px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:rgba(245,241,232,.4);text-transform:uppercase}
+.nav a{display:flex;align-items:center;gap:10px;padding:10px 22px;color:rgba(245,241,232,.7);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:all .2s;cursor:pointer;font-family:var(--serif-zh);font-weight:400}
+.nav a:hover{background:rgba(255,255,255,.04);color:var(--paper)}
+.nav a.active{background:rgba(255,255,255,.06);color:var(--paper);font-weight:600}
+.nav a.shared.active{border-left-color:var(--accent)}
+.nav a.xhs-link.active{border-left-color:var(--xhs)}
+.nav a.dy-link.active{border-left-color:#4ade80}
+.nav .idx{font-family:var(--mono);font-size:10px;letter-spacing:.1em;opacity:.5;min-width:24px}
+
+.ext-btns{padding:16px 22px;border-top:1px solid rgba(255,255,255,.08)}
+.ext-btns .label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:rgba(245,241,232,.45);margin-bottom:6px;text-transform:uppercase}
+.ext-btns .hint{font-size:11px;color:#fbbf24;margin-bottom:12px;line-height:1.5;font-family:var(--sans-zh)}
+.ext-btn{display:block;padding:10px 14px;background:rgba(255,255,255,.05);color:rgba(245,241,232,.85);border-radius:4px;font-size:12px;text-decoration:none;margin-bottom:8px;transition:.2s;font-family:var(--serif-zh)}
+.ext-btn:hover{background:rgba(255,255,255,.1);color:var(--paper)}
+.ext-btn.xhs{border-left:3px solid var(--xhs)}
+.ext-btn.dy{border-left:3px solid #4ade80}
+
+.sidebar-foot{padding:14px 22px;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:rgba(245,241,232,.4);border-top:1px solid rgba(255,255,255,.08);line-height:1.8}
+
+/* ============ 主内容区 ============ */
+.main{margin-left:240px;flex:1;padding:48px 56px 80px;max-width:1240px}
+
+.doc-head{margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid var(--rule)}
+.doc-head .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.doc-head h1{font-family:var(--serif-zh);font-weight:700;font-size:42px;letter-spacing:-.01em;line-height:1.15;color:var(--ink);margin-bottom:14px}
+.doc-head .lead{font-family:var(--serif-zh);font-size:17px;color:var(--ink-soft);line-height:1.65;max-width:680px}
+
+.section{margin-bottom:64px;scroll-margin-top:24px}
+.section-h{font-family:var(--serif-zh);font-weight:700;font-size:26px;color:var(--ink);margin-bottom:24px;letter-spacing:-.005em;display:flex;align-items:baseline;gap:14px}
+.section-h .num{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:28px;color:var(--accent);min-width:42px}
+.section-h .badge{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-left:auto;font-weight:400}
+
+.section.xhs .section-h .num{color:var(--xhs)}
+.section.dy .section-h .num{color:var(--dy)}
+.section-rule{height:1px;background:var(--rule);margin:0 0 28px}
+.section.xhs .section-rule{background:linear-gradient(to right,var(--xhs) 0%,var(--xhs) 80px,var(--rule) 80px)}
+.section.dy .section-rule{background:linear-gradient(to right,var(--dy) 0%,var(--dy) 80px,var(--rule) 80px)}
+
+/* 平台分隔 */
+.platform-divider{margin:72px 0 48px;display:flex;align-items:center;gap:18px}
+.platform-divider .line{flex:1;height:1px;background:var(--rule)}
+.platform-divider .label{font-family:var(--serif-zh);font-weight:700;font-size:18px;color:var(--ink);letter-spacing:.05em}
+.platform-divider .label .en{font-family:var(--serif-en);font-style:italic;font-weight:400;font-size:14px;color:var(--muted);margin-left:8px}
+
+/* ============ 概览段 ============ */
+.summary{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:22px 26px;margin-bottom:28px;font-size:14px;line-height:1.85;color:var(--ink-soft);font-family:var(--serif-zh)}
+.summary b{color:var(--ink);font-weight:700}
+
+.kpi-row.platform-kpi .kpi .label{color:var(--muted)}
+.kpi-section-label{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
+.method-box{background:var(--paper-tint);border:1px dashed var(--rule);border-radius:4px;padding:14px 18px;margin-bottom:24px;font-size:12px;line-height:1.75;color:var(--ink-soft)}
+.method-box b{color:var(--ink)}
+.insight-group-label{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);margin:28px 0 12px;text-transform:uppercase}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:22px 20px;position:relative;overflow:hidden}
+.kpi.xhs-tone{background:var(--ink);color:var(--paper);border:none}
+.kpi.dy-tone{background:var(--dy);color:var(--paper);border:none}
+.kpi.accent-tone{background:var(--paper-tint);border:none}
+.kpi .label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:10px}
+.kpi .value{font-family:var(--serif-en);font-weight:700;font-size:32px;line-height:1.1;letter-spacing:-.02em;margin-bottom:10px}
+.kpi .value .unit{font-size:18px;margin-left:2px;opacity:.75}
+.kpi .sub{font-size:12px;line-height:1.5;opacity:.7;font-family:var(--sans-zh)}
+.kpi.xhs-tone .sub,.kpi.dy-tone .sub{opacity:.8}
+
+/* ============ 柱状图 修复重叠 ============ */
+.chart-wrap{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:20px 22px}
+.chart-title{font-family:var(--serif-zh);font-weight:600;font-size:14px;color:var(--ink);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.bar-chart{display:flex;align-items:flex-end;justify-content:space-around;gap:14px;height:200px;padding:8px 0 4px;position:relative}
+.bar-col{flex:1;max-width:80px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.bar-val{font-family:var(--serif-en);font-weight:700;font-size:14px;color:var(--ink);height:18px;line-height:18px}
+.bar{width:100%;max-width:42px;border-radius:2px 2px 0 0;transition:.2s;min-height:6px}
+.bar:hover{opacity:.85}
+.bar.ink-tone{background:linear-gradient(180deg,var(--ink-soft),var(--ink))}
+.bar.xhs-tone{background:linear-gradient(180deg,#e57189,var(--xhs))}
+.bar.dy-tone{background:linear-gradient(180deg,#52a37c,var(--dy))}
+.bar-label{font-size:11px;color:var(--muted);text-align:center;line-height:1.3;font-family:var(--sans-zh);max-width:100%;overflow-wrap:break-word;height:32px;display:flex;align-items:center;justify-content:center}
+
+/* ============ 洞察列表 ============ */
+.insight-list{list-style:none;display:grid;gap:14px}
+.insight{background:#fff;border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:4px;padding:22px 26px;display:grid;grid-template-columns:48px 1fr;gap:18px;align-items:start}
+.insight .nb{font-family:var(--serif-en);font-style:italic;font-weight:600;font-size:32px;color:var(--accent);line-height:1}
+.insight .body .t{font-family:var(--serif-zh);font-weight:700;font-size:17px;color:var(--ink);margin-bottom:10px;line-height:1.45}
+.insight .body .ev{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px}
+.insight .body .act{display:inline-block;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:3px;font-size:12px;font-weight:500;line-height:1.5}
+.insight .body .act .arrow{font-family:var(--serif-en);margin-right:6px;font-style:italic}
+
+/* ============ 表格 ============ */
+.table-wrap{background:#fff;border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--ink);color:var(--paper)}
+thead.xhs{background:var(--xhs)}
+thead.dy{background:var(--dy)}
+th{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:12px 14px;text-align:left;white-space:nowrap;opacity:.92}
+td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--paper-tint)}
+td.rank{font-family:var(--serif-en);font-style:italic;font-weight:600;font-size:15px;width:50px}
+.section.xhs td.rank{color:var(--xhs)}
+.section.dy td.rank{color:var(--dy)}
+td.num{font-family:var(--serif-en);font-weight:600;text-align:right}
+td.title{max-width:340px;color:var(--ink);font-weight:500}
+td.author{color:var(--muted);font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.tag{display:inline-block;padding:3px 10px;border-radius:2px;font-size:11px;font-family:var(--mono);letter-spacing:.05em;background:var(--paper-tint);color:var(--ink-soft)}
+.tag.xhs{background:var(--xhs-soft);color:var(--xhs)}
+.tag.dy{background:var(--dy-soft);color:var(--dy)}
+.tag.hook{background:rgba(184,134,11,.1);color:var(--accent)}
+.tag.trend-up{background:#e8f5e9;color:#2d6a4f}
+.tag.trend-flat{background:var(--paper-tint);color:#7a6a4a}
+.tag.trend-hall{background:#f3e8ff;color:#6b21a8}
+.pool-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);margin:28px 0 12px;text-transform:uppercase}
+.pool-label b{color:var(--ink);font-weight:600}
+.trend-signal-grid{display:grid;gap:14px;margin-bottom:8px}
+.trend-signal{border:1px solid var(--rule);border-radius:10px;padding:16px 18px;background:#fff;display:grid;grid-template-columns:42px 1fr;gap:12px}
+.trend-signal .arrow{font-family:var(--serif-en);font-size:28px;font-weight:700;line-height:1;color:var(--accent)}
+.trend-signal.up .arrow{color:#2d6a4f}
+.trend-signal .topic{font-family:var(--serif-zh);font-weight:700;font-size:15px;margin-bottom:4px}
+.trend-signal .status{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.trend-signal .ev{font-size:13px;color:var(--ink-soft);margin-bottom:6px}
+.trend-signal .act{font-size:12px;color:var(--muted)}
+.two-pool-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px}
+@media(max-width:1100px){.two-pool-grid{grid-template-columns:1fr}}
+
+/* ============ 需求洞察 ============ */
+.demand-box{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:20px 22px}
+.demand-box h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--xhs);margin-bottom:14px;font-weight:600}
+.demand-box ul{list-style:none;padding:0}
+.demand-box li{font-size:13px;line-height:1.65;color:var(--ink-soft);padding:8px 0;border-bottom:1px dashed var(--rule)}
+.demand-box li:last-child{border-bottom:none}
+.demand-box li::before{content:'→';color:var(--xhs);margin-right:8px;font-family:var(--mono)}
+
+/* ============ 本月建议方向 ============ */
+.direction-grid{display:flex;flex-direction:column;gap:16px}
+.direction-card{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:22px 24px;border-left:4px solid var(--accent);transition:.15s}
+.direction-card:hover{box-shadow:0 6px 20px rgba(26,46,31,.06)}
+.direction-card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.direction-card .topic{font-family:var(--serif-zh);font-size:17px;font-weight:700;color:var(--ink);line-height:1.35}
+.direction-card .heat{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-align:right;max-width:280px;line-height:1.6}
+.direction-card .discuss{font-size:13px;color:var(--ink-soft);line-height:1.65;margin-bottom:16px;padding:12px 14px;background:var(--paper-tint);border-radius:3px;font-family:var(--serif-zh)}
+.direction-card .discuss::before{content:'“';color:var(--accent);font-weight:700;margin-right:2px}
+.direction-card .discuss::after{content:'”';color:var(--accent);font-weight:700;margin-left:2px}
+.direction-card .cols{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:20px}
+@media(max-width:700px){.direction-card .cols{grid-template-columns:1fr}}
+.direction-card .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.direction-card .skus{display:flex;flex-wrap:wrap;gap:6px}
+.direction-card .sku{display:block;padding:10px 12px;background:var(--paper-tint);border:1px solid var(--rule);border-radius:3px;margin-bottom:8px}
+.direction-card .sku:last-child{margin-bottom:0}
+.direction-card .sku-name{font-family:var(--serif-zh);font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.direction-card .sku-pri{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--accent);border:1px solid rgba(184,134,11,.35);padding:1px 5px;border-radius:2px}
+.direction-card .sku-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+.direction-card .sku-tag{font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.45;font-family:var(--sans-zh)}
+.direction-card .content-dir{font-size:13px;line-height:1.75;color:var(--ink-soft)}
+.direction-card .content-dir p{margin-bottom:6px}
+.direction-card .content-dir b{font-weight:600;color:var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+/* ============ 评论引语 ============ */
+.quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.quote{background:var(--paper-tint);border-left:3px solid var(--dy);border-radius:0 4px 4px 0;padding:18px 22px}
+.quote.xhs-tone{border-left-color:var(--xhs);background:var(--xhs-soft)}
+.quote p{font-family:var(--serif-zh);font-size:14px;color:var(--ink);margin-bottom:10px;line-height:1.7}
+.quote .src{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+
+/* ============ 品牌卡片 ============ */
+.brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.brand-card{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;transition:.15s}
+.brand-card:hover{border-color:var(--dy);box-shadow:0 4px 12px rgba(45,106,79,.08)}
+.brand-card.xhs-tone:hover{border-color:var(--xhs);box-shadow:0 4px 12px rgba(214,57,86,.08)}
+.brand-card.xhs-tone .brand-stats b{color:var(--xhs)}
+.brand-card.dead{opacity:.5;background:var(--paper-tint)}
+.brand-head{display:flex;justify-content:space-between;align-items:baseline}
+.brand-name{font-family:var(--serif-zh);font-weight:700;font-size:16px;color:var(--ink)}
+.brand-tagct{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+.brand-tagct b{color:var(--dy);font-weight:700;font-size:13px;font-family:var(--serif-en);margin-left:4px}
+.brand-card.dead .brand-tagct b{color:var(--muted)}
+.brand-title{font-size:12px;line-height:1.6;color:var(--ink-soft);min-height:38px;font-family:var(--sans-zh)}
+.brand-stats{display:flex;gap:16px;padding-top:10px;border-top:1px dashed var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+.brand-stats b{font-family:var(--serif-en);font-weight:700;color:var(--dy);font-size:14px;letter-spacing:0;margin-right:2px}
+
+.tag.threat-high{background:#fde8e8;color:#b42318}
+.tag.threat-mid{background:#fff4e5;color:#b54708}
+.tag.threat-low{background:var(--paper-tint);color:var(--muted)}
+.tag.threat-self{background:#e8f0fe;color:#1d4ed8}
+.tag.decision{background:rgba(45,106,79,.12);color:var(--dy);font-weight:600}
+.tag.commerce-cart{background:#fde8e8;color:#b42318;font-weight:600}
+.tag.commerce-coop{background:#f3e8ff;color:#6b21a8}
+.tag.commerce-soft{background:var(--paper-tint);color:var(--muted)}
+.tag.commerce-brand{background:#e8f0fe;color:#1d4ed8}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+/* ============ 竞品动作板 ============ */
+.comp-table td.brand-cell{font-family:var(--serif-zh);font-weight:700;font-size:14px}
+.comp-table tr.self-row{background:rgba(29,78,216,.04)}
+.comp-table tr.self-row td.brand-cell{color:#1d4ed8}
+.comp-table thead tr.subhead th{font-size:10px;padding:6px 8px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--rule)}
+.comp-clip{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rep-stack{display:flex;flex-direction:column;gap:10px}
+.rep-stack .comp-clip+.comp-clip{padding-top:10px;border-top:1px dashed var(--rule)}
+.comp-product{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+.comp-title{font-size:12px;line-height:1.45;color:var(--ink);word-break:break-word}
+.comp-meta{font-size:10px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.comp-more{font-size:10px;color:var(--muted);padding:4px 0;border-top:1px dashed var(--rule);line-height:1.4}
+.comp-more .pid{color:var(--accent);font-weight:600;margin-right:4px}
+.comp-more b{color:var(--ink);font-weight:600}
+.comp-empty{color:var(--muted);font-size:12px}
+.comp-implication{font-size:12px;color:var(--ink-soft);line-height:1.55;max-width:280px}
+
+/* ============ 自有机会矩阵 ============ */
+.opp-grid{display:flex;flex-direction:column;gap:14px}
+.scene-links{margin-top:32px}
+.scene-links h3,.follow-block h3{font-size:15px;font-weight:600;margin:0 0 12px;color:var(--ink)}
+.scene-table{width:100%;border-collapse:collapse;font-size:12px}
+.scene-table th,.scene-table td{padding:10px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+.scene-table th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.follow-block{margin-top:28px;padding:20px;background:var(--paper);border:1px solid var(--rule);border-radius:8px}
+.follow-empty{color:var(--muted);font-size:13px;padding:12px 0}
+.follow-item{padding:12px 0;border-bottom:1px solid var(--rule)}
+.follow-item:last-child{border-bottom:none}
+.comp-sub{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.opp-card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:20px 22px;border-left:4px solid var(--dy)}
+.opp-card.accel{border-left-color:#b42318}
+.opp-card .head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.opp-card .arrow{font-family:var(--serif-en);font-size:26px;font-weight:700;color:var(--dy);line-height:1;min-width:28px}
+.opp-card.accel .arrow{color:#b42318}
+.opp-card .topic{font-family:var(--serif-zh);font-size:17px;font-weight:700;line-height:1.35}
+.opp-card .meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:4px}
+.opp-card .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+@media(max-width:800px){.opp-card .cols{grid-template-columns:1fr}}
+.opp-card .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.opp-card .val{font-size:13px;color:var(--ink-soft);line-height:1.65}
+.opp-card .skus{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opp-card .sku-chip{font-size:11px;padding:4px 8px;background:var(--paper-tint);border:1px solid var(--rule);border-radius:3px;font-family:var(--sans-zh)}
+.opp-card .play{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule)}
+.opp-card .play b{color:var(--ink);font-family:var(--mono);font-size:10px}
+
+/* ============ Toast 提示 ============ */
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--ink);color:var(--paper);padding:20px 28px;border-radius:6px;font-size:14px;box-shadow:0 10px 40px rgba(0,0,0,.4);z-index:9999;opacity:0;transition:.25s;text-align:center;line-height:1.8;pointer-events:none;font-family:var(--serif-zh)}
+.toast.show{opacity:1}
+.toast .accent{color:#fbbf24}
+
+.back-top{position:fixed;bottom:32px;right:32px;width:42px;height:42px;background:var(--ink);color:var(--paper);border:none;border-radius:50%;cursor:pointer;font-size:18px;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.2s;z-index:50;font-family:var(--serif-en)}
+.back-top.show{opacity:1;pointer-events:auto}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:24px 18px 48px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .quote-grid,.two-col,.brand-grid{grid-template-columns:1fr}
+  .doc-head h1{font-size:30px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div class="mono">FY26 · Brand Intel</div>
+      <h2>家清品牌月报</h2>
+      <div class="sub">05.17 – 06.15 · 近 30 天</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">品牌决策</div>
+      <a data-target="s1" class="shared active"><span class="idx">01</span>品牌简报</a>
+      <a data-target="s2" class="shared"><span class="idx">02</span>竞品动作板</a>
+      <a data-target="s3" class="shared"><span class="idx">03</span>自有机会矩阵</a>
+      <a data-target="s4" class="shared"><span class="idx">04</span>本月趋势</a>
+      <a data-target="s5" class="shared"><span class="idx">05</span>全网 + 品牌洞察</a>
+
+      <div class="nav-group">小红书 · XHS</div>
+      <a data-target="s6" class="xhs-link"><span class="idx">06</span>趋势 + 殿堂榜</a>
+      <a data-target="s7" class="xhs-link"><span class="idx">07</span>需求 + 品牌</a>
+
+      <div class="nav-group">抖音 · DY</div>
+      <a data-target="s8" class="dy-link"><span class="idx">08</span>趋势 + 殿堂榜</a>
+      <a data-target="s9" class="dy-link"><span class="idx">09</span>评论 + 品牌</a>
+
+      <div class="nav-group">执行清单</div>
+      <a data-target="s10" class="shared"><span class="idx">10</span>内容执行方向</a>
+    </nav>
+    <div class="ext-btns">
+      <div class="label">深度阅读版</div>
+      <div class="hint">⌘ Cmd / Ctrl + 点击<br>另开 tab 打开</div>
+      <a class="ext-btn xhs" href="#" onclick="return pptClick(event, this.href)">📕 小红书 · 深度阅读</a>
+      <a class="ext-btn dy" href="#" onclick="return pptClick(event, this.href)">🎵 抖音 · 深度阅读</a>
+    </div>
+    <div class="sidebar-foot">
+      Monthly Report<br>
+      Updated · 2026-06-12
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="doc-head">
+      <div class="kicker">Vol. 01 · 家清品类 · 品牌情报</div>
+      <h1>家清品牌月报<br><span style="font-size:22px;font-weight:400;color:var(--muted)">趋势监测 × 竞品动作 × 自有机会</span></h1>
+      <p class="lead" id="docLead">从品牌经营视角解读家清赛道：哪些场景在升温、竞品在做什么、自有该跟不跟、主推哪个 SKU。数据覆盖小红书 + 抖音近 30 天监测词与 8 个竞品品牌。</p>
+    </div>
+
+    <!-- §1 品牌简报 -->
+    <section class="section" id="s1">
+      <h2 class="section-h"><span class="num">01</span>品牌简报<span class="badge">YANXUAN · Brief</span></h2>
+      <div class="section-rule"></div>
+      <div class="summary" id="overviewText">加载中…</div>
+      <div class="method-box" id="methodologyBox"></div>
+      <div class="kpi-section-label">全网热点 · 品类监测池</div>
+      <div class="kpi-row platform-kpi" id="platformKpiRow"></div>
+      <div class="kpi-section-label">品牌决策 · 竞品监测池</div>
+      <div class="kpi-row" id="brandKpiRow"></div>
+      <div class="two-col">
+        <div class="chart-wrap">
+          <div class="chart-title">📕 小红书 · 分类分布</div>
+          <div class="bar-chart" id="xhsCatChart"></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">🎵 抖音 · 分类分布</div>
+          <div class="bar-chart" id="dyCatChart"></div>
+        </div>
+      </div>
+      <p style="margin-top:16px;font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:.1em">
+        SHARED CATEGORIES · 共同分类 — <span id="commonCats" style="color:var(--ink);font-family:var(--serif-zh);font-weight:600"></span>
+      </p>
+    </section>
+
+    <!-- §2 竞品动作板 -->
+    <section class="section" id="s2">
+      <h2 class="section-h"><span class="num">02</span>竞品动作板<span class="badge">COMPETITOR · Actions</span></h2>
+      <div class="section-rule"></div>
+      <p class="summary" style="margin-bottom:20px">8 个监测品牌各展示<b>最多 3 条代表片</b>（小红书 / 抖音格式一致）；能识别单品/挂车时前置标注，无品则不标。展示顺序：有品优先，同档按赞数。<br><span style="font-size:12px;color:var(--muted)">「未命中」= 本批合并检索池内无含品牌名内容，不等于平台上完全没有该品牌笔记/视频。</span></p>
+      <div class="table-wrap">
+        <table class="comp-table" id="competitorTable">
+          <thead>
+            <tr>
+              <th>品牌</th><th>状态</th><th>主战场</th>
+              <th>小红书代表片</th>
+              <th>抖音代表片</th>
+              <th>对自有</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- §3 自有机会矩阵 -->
+    <section class="section" id="s3">
+      <h2 class="section-h"><span class="num">03</span>自有机会矩阵<span class="badge">OPPORTUNITY · Matrix</span></h2>
+      <div class="section-rule"></div>
+      <p class="summary" style="margin-bottom:20px"><b>趋势 × 竞品空白 × 主推 SKU × 品牌决策</b>——本月最值得自有投入精力的 6 个方向，可直接用于选题会拍板。</p>
+      <div class="opp-grid" id="opportunityMatrix"></div>
+      <div class="scene-links">
+        <h3>场景关联层 · scene_links</h3>
+        <p style="font-size:12px;color:var(--muted);margin:-6px 0 14px">趋势场景 × 竞品占位 × 自有 SKU（非同一条视频求交）</p>
+        <div class="table-wrap"><table class="scene-table" id="sceneLinksTable">
+          <thead><tr><th>场景</th><th>趋势</th><th>竞品</th><th>自有 SKU</th><th>决策</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="follow-block" id="followBlock" style="display:none">
+        <h3>可跟投候选 · follow_candidates</h3>
+        <p style="font-size:12px;color:var(--muted);margin:-6px 0 14px">品类池热点 ∩ 已确认挂品/挂车</p>
+        <div id="followCandidates"></div>
+      </div>
+    </section>
+
+    <!-- §4 本月趋势 -->
+    <section class="section" id="s4">
+      <h2 class="section-h"><span class="num">04</span>本月趋势信号<span class="badge">TREND · Velocity</span></h2>
+      <div class="section-rule"></div>
+      <p class="summary" style="margin-bottom:20px">按<b>日均增速</b>（小红书）与<b>赞粉比/传播力</b>（抖音）识别「这个月正在起来」的内容，与殿堂总量榜分开看——避免老爆款占榜、趋势感失真。</p>
+      <div class="trend-signal-grid" id="trendSignals"></div>
+      <div class="two-pool-grid">
+        <div>
+          <div class="pool-label"><b>📕 小红书趋势榜</b> · 按日均赞速</div>
+          <div class="table-wrap">
+            <table id="xhsTrendTable">
+              <thead class="xhs"><tr><th>#</th><th>标题</th><th>增速</th><th>发布</th><th>标签</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="pool-label"><b>🎵 抖音趋势榜</b> · 低粉爆款 / 高分享</div>
+          <div class="table-wrap">
+            <table id="dyTrendTable">
+              <thead class="dy"><tr><th>#</th><th>标题</th><th>点赞</th><th>标签</th><th>品类</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §5 品牌洞察 -->
+    <section class="section" id="s5">
+      <h2 class="section-h"><span class="num">05</span>洞察<span class="badge">Platform + Brand</span></h2>
+      <div class="section-rule"></div>
+      <div id="insightList"></div>
+    </section>
+
+    <div class="platform-divider">
+      <div class="line"></div>
+      <div class="label">📕 小红书<span class="en">XHS · Data</span></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- §6 小红书 趋势 + 殿堂 -->
+    <section class="section xhs" id="s6">
+      <h2 class="section-h"><span class="num">06</span>趋势榜 + 殿堂榜<span class="badge">XHS · Dual Pool</span></h2>
+      <div class="section-rule"></div>
+      <div class="pool-label"><b>趋势榜 TOP 10</b> · 品牌内容/投放切入优先</div>
+      <div class="table-wrap">
+        <table id="xhsTrendFullTable">
+          <thead class="xhs"><tr><th>#</th><th>标题</th><th>增速</th><th>点赞</th><th>发布</th><th>标签</th><th>商业</th><th>分类</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pool-label"><b>殿堂榜 TOP 10</b> · 总量天花板，非本月决策依据</div>
+      <div class="table-wrap">
+        <table id="xhsHallTable">
+          <thead class="xhs"><tr><th>#</th><th>标题</th><th>点赞</th><th>收藏</th><th>发酵天数</th><th>标签</th><th>商业</th><th>公式</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- §7 小红书需求 + 品牌 -->
+    <section class="section xhs" id="s7">
+      <h2 class="section-h"><span class="num">07</span>用户需求 + 评价品牌<span class="badge">XHS · Demand & Brand</span></h2>
+      <div class="section-rule"></div>
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:14px;text-transform:uppercase">用户痛点 · 评论原声</div>
+      <div class="quote-grid" id="xhsQuotes"></div>
+      <div class="two-col" style="margin-top:28px">
+        <div class="demand-box" id="xhsDemandVideo"></div>
+        <div class="demand-box" id="xhsDemandProduct"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);margin:32px 0 14px;text-transform:uppercase">10 个监测品牌 · 小红书挂笔记表现</div>
+      <div class="brand-grid" id="xhsBrands"></div>
+    </section>
+
+    <div class="platform-divider">
+      <div class="line"></div>
+      <div class="label">🎵 抖音<span class="en">DY · Data</span></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- §8 抖音 趋势 + 殿堂 -->
+    <section class="section dy" id="s8">
+      <h2 class="section-h"><span class="num">08</span>趋势榜 + 殿堂榜 + 钩子<span class="badge">DY · Dual Pool</span></h2>
+      <div class="section-rule"></div>
+      <div class="pool-label"><b>趋势榜</b> · 低粉爆款 / 高传播</div>
+      <div class="table-wrap">
+        <table id="dyTrendFullTable">
+          <thead class="dy"><tr><th>#</th><th>标题</th><th>点赞</th><th>分享</th><th>标签</th><th>商业</th><th>钩子</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pool-label"><b>殿堂榜</b> · 总量天花板</div>
+      <div class="table-wrap">
+        <table id="dyHallTable">
+          <thead class="dy"><tr><th>#</th><th>标题</th><th>点赞</th><th>分享</th><th>时长</th><th>商业</th><th>钩子</th><th>品类</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="two-col" style="margin-top:18px">
+        <div class="chart-wrap">
+          <div class="chart-title">首帧钩子分布</div>
+          <div class="bar-chart" id="dyHookChart"></div>
+        </div>
+        <div class="summary" id="dyScriptInfo" style="margin-bottom:0"></div>
+      </div>
+    </section>
+
+    <!-- §9 抖音评论 + 品牌 -->
+    <section class="section dy" id="s9">
+      <h2 class="section-h"><span class="num">09</span>评论原声 + 品牌挂tag<span class="badge">DY · Voice & Brand</span></h2>
+      <div class="section-rule"></div>
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:14px;text-transform:uppercase">用户痛点 · 评论原文</div>
+      <div class="quote-grid" id="dyQuotes"></div>
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);margin:32px 0 14px;text-transform:uppercase">8 个品牌 · 真实流量</div>
+      <div class="brand-grid" id="dyBrands"></div>
+    </section>
+
+    <div class="platform-divider">
+      <div class="line"></div>
+      <div class="label">🎯 执行清单<span class="en">Action · Playbook</span></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- §10 内容执行方向 -->
+    <section class="section" id="s10">
+      <h2 class="section-h"><span class="num">10</span>内容执行方向<span class="badge">EXECUTION · Detail</span></h2>
+      <div class="section-rule"></div>
+      <p class="summary" style="margin-bottom:24px">机会矩阵的展开版：<b>话题 → brief SKU → 分平台内容打法</b>，供内容/投放团队直接拆任务。</p>
+      <div class="direction-grid" id="monthlyDirections"></div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const DATA = {"xhs":{"RANKS":[],"TREND_RANKS":[],"HALL_RANKS":[],"BRANDS":[],"QUOTES":[],"DEMAND":{"video":[],"product":[]},"CATS":[]},"dy":{"category_top":[],"brands":[],"TREND_RANKS":[],"HALL_RANKS":[]},"overview":{"headline":"运行 pipeline 后自动填充"},"competitor_actions":[],"opportunity_matrix":[],"scene_links":[],"follow_candidates":[],"yanxuan_voice":{"status":"待生成"},"directions":[]};
+
+function fmt(n){
+  if(n==null) return '—';
+  if(typeof n==='string') return n;
+  if(n>=10000) return (n/10000).toFixed(1)+'<span class="unit">万</span>';
+  return n.toLocaleString();
+}
+function fmtPlain(n){
+  if(n==null) return '—';
+  if(typeof n==='string') return n;
+  if(n>=10000) return (n/10000).toFixed(1)+'万';
+  return n.toLocaleString();
+}
+
+function trendTagClass(tag){
+  if(!tag) return 'trend-flat';
+  if(tag.includes('新兴') || tag.includes('低粉') || tag.includes('黑马')) return 'trend-up';
+  if(tag.includes('殿堂') || tag.includes('高位') || tag.includes('常青')) return 'trend-hall';
+  return 'trend-flat';
+}
+
+function threatClass(t){
+  if(t==='高') return 'threat-high';
+  if(t==='中') return 'threat-mid';
+  if(t==='自有') return 'threat-self';
+  return 'threat-low';
+}
+
+function commerceTagClass(type){
+  if(type==='已挂商品') return 'commerce-cart';
+  if(type==='品牌合作') return 'commerce-coop';
+  if(type==='品牌露出') return 'commerce-brand';
+  if(type==='疑似种草') return 'commerce-soft';
+  return 'commerce-soft';
+}
+
+function commerceBadge(c){
+  if(!c || !c.commerce_type || c.commerce_type==='无商业') return '<span class="tag commerce-soft">无</span>';
+  return `<span class="tag ${commerceTagClass(c.commerce_type)}" title="${c.commerce_detail||''}">${c.commerce_label||c.commerce_type}</span>`;
+}
+
+function renderOverview(){
+  const o = DATA.overview;
+  const bk = o.brand_kpi || {};
+  const pk = o.platform_kpi || {};
+  const yv = DATA.yanxuan_voice || o.yanxuan_voice || {};
+  const xhsTrend = o.xhs_trend_top1 || {};
+  const xhsHall = o.xhs_hall_top1 || {};
+  const dyTrend = o.dy_trend_top1 || {};
+  const dyHall = o.dy_top1 || {};
+  const meth = o.data_methodology || {};
+  document.getElementById('overviewText').innerHTML = `
+    数据周期：<b>${o.window}</b> · 样本 <b>${pk.total_samples||o.total_samples||'—'}</b> 条<br>
+    <span style="color:var(--muted);font-family:var(--sans-zh);font-size:13px">双层结构：<b>全网热点</b>（品类词）+ <b>品牌决策</b>（品牌词）并行，互不替代。</span>`;
+  document.getElementById('methodologyBox').innerHTML = meth.platform_pool ? `
+    <b>数据口径 · 方案 C 双池 + 关联层</b><br>
+    ① 品类池：${meth.platform_pool}<br>
+    ② 品牌池：${meth.brand_pool}<br>
+    ${meth.commerce_review?`③ 商业复核：${meth.commerce_review}<br>`:''}
+    ${meth.scene_links?`④ ${meth.scene_links}<br>`:''}
+    ${meth.follow_candidates?`⑤ ${meth.follow_candidates}<br>`:''}
+    <span style="color:#b42318">⚠ ${meth.do_not_mix||''}</span>` : '';
+  document.getElementById('platformKpiRow').innerHTML = `
+    <div class="kpi xhs-tone">
+      <div class="label">📕 XHS 趋势 TOP</div>
+      <div class="value">${fmt(xhsTrend.likes)}</div>
+      <div class="sub">${(xhsTrend.title||'—').slice(0,28)}…<br>${xhsTrend.extra||''}</div>
+    </div>
+    <div class="kpi xhs-tone" style="opacity:.92">
+      <div class="label">📕 XHS 殿堂 TOP</div>
+      <div class="value">${fmt(xhsHall.likes)}</div>
+      <div class="sub">${(xhsHall.title||'—').slice(0,28)}…<br>${xhsHall.extra||''}</div>
+    </div>
+    <div class="kpi dy-tone">
+      <div class="label">🎵 DY 趋势 TOP</div>
+      <div class="value">${fmt(dyTrend.likes)}</div>
+      <div class="sub">${(dyTrend.title||'—').slice(0,28)}…<br>${dyTrend.extra||''}</div>
+    </div>
+    <div class="kpi dy-tone" style="opacity:.92">
+      <div class="label">🎵 DY 殿堂 TOP</div>
+      <div class="value">${fmt(dyHall.likes)}</div>
+      <div class="sub">${(dyHall.title||'—').slice(0,28)}…<br>${dyHall.extra||''}</div>
+    </div>
+  `;
+  document.getElementById('brandKpiRow').innerHTML = `
+    <div class="kpi accent-tone">
+      <div class="label">自有社媒声量</div>
+      <div class="value" style="font-size:22px;font-family:var(--serif-zh)">${yv.status||bk.yanxuan_status||'—'}</div>
+      <div class="sub">品牌代表片合计 ${fmtPlain(yv.total_likes||0)} 赞</div>
+    </div>
+    <div class="kpi">
+      <div class="label">活跃竞品</div>
+      <div class="value">${bk.competitor_active||0}</div>
+      <div class="sub">品牌监测池有动作</div>
+    </div>
+    <div class="kpi dy-tone">
+      <div class="label">确认带货竞品</div>
+      <div class="value">${bk.competitor_cart||0}</div>
+      <div class="sub">挂品/挂车（非仅 tag）</div>
+    </div>
+    <div class="kpi xhs-tone">
+      <div class="label">升温赛道</div>
+      <div class="value">${bk.rising_trends||0}</div>
+      <div class="sub">趋势箭头 ↑ 方向数</div>
+    </div>
+  `;
+  function bar(targetId, items, tone){
+    const max = Math.max(...items.map(i=>i[1]));
+    document.getElementById(targetId).innerHTML = items.map(([k,v])=>{
+      const h = Math.max(8, (v/max)*120);
+      return `
+        <div class="bar-col">
+          <div class="bar-val">${v}</div>
+          <div class="bar ${tone}" style="height:${h}px"></div>
+          <div class="bar-label">${k}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  bar('xhsCatChart', o.xhs_cat_dist, 'xhs-tone');
+  bar('dyCatChart', o.dy_cat_dist, 'dy-tone');
+  document.getElementById('commonCats').textContent = o.shared_categories.join(' · ') || '无重叠';
+}
+
+function renderCompetitors(){
+  const rows = DATA.competitor_actions || [];
+  const clipHasProduct = c => !!(c?.product_line || c?.commerce_type === '已挂商品' || (c?.product_names||[]).length);
+  const orderClips = list => [...list].sort((a,b)=>{
+    const ap = clipHasProduct(a)?1:0, bp = clipHasProduct(b)?1:0;
+    if(bp!==ap) return bp-ap;
+    return (b.likes||0)-(a.likes||0);
+  }).slice(0,3);
+  const repCell = (clip) => {
+    if(!clip) return '';
+    if((clip.title_raw||'').startsWith('（本批样本') || clip.title_clean === '（无标题）' && !clip.likes){
+      return `<div class="comp-empty">${clip.title_raw || '本批未命中'}</div>`;
+    }
+    const product = clip.product_line
+      ? `<div class="comp-product">${clip.product_line}</div>` : '';
+    const title = clip.title_clean || clip.title || '';
+    const raw = (clip.title_raw || title).replace(/"/g,'&quot;');
+    const meta = [
+      clip.rank ? `#${clip.rank}` : '',
+      `${clip.likes_label||clip.likes||0} 赞`,
+      clip.action_type || '',
+      clip.duration || '',
+      commerceBadge(clip),
+    ].filter(Boolean).join(' · ');
+    return `<div class="comp-clip">${product}<div class="comp-title" title="${raw}">${title}</div><div class="comp-meta">${meta}</div></div>`;
+  };
+  const repsCell = (platform, listKey, inactiveNote) => {
+    if(inactiveNote) return `<div class="comp-empty">${inactiveNote}</div>`;
+    const raw = platform?.[listKey] || [];
+    const clips = orderClips(raw.length ? raw : (platform ? [platform] : []));
+    if(!clips.length) return `<div class="comp-empty">本批未命中</div>`;
+    return `<div class="rep-stack">${clips.map(repCell).join('')}</div>`;
+  };
+  document.querySelector('#competitorTable tbody').innerHTML = rows.map(r=>{
+    const xhsInactive = !r.xhs && r.xhs_likes === 0;
+    const dyInactive = !r.dy || (r.dy?.likes === 0 && (r.dy?.title_raw||'').includes('本批样本'));
+    return `
+    <tr class="${r.is_self?'self-row':''}">
+      <td class="brand-cell">${r.brand}${r.is_self?' <span class="tag threat-self">自有</span>':''}</td>
+      <td><span class="tag ${threatClass(r.threat)}">${r.status}</span></td>
+      <td style="font-size:12px">${r.scene||'—'}</td>
+      <td>${repsCell(r.xhs, 'top_notes', xhsInactive ? '本批未命中（正文/标题无品牌名）' : null)}</td>
+      <td>${repsCell(r.dy, 'top_videos', dyInactive ? '本批未命中（描述无品牌名）' : null)}</td>
+      <td class="comp-implication">${r.implication||'—'}<div style="font-size:10px;color:var(--muted);margin-top:6px">${r.commerce_action||''}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOpportunity(){
+  const items = DATA.opportunity_matrix || [];
+  document.getElementById('opportunityMatrix').innerHTML = items.map(o=>{
+    const accel = ['加速切入','差异化跟打','抢先布局'].includes(o.decision);
+    return `
+    <div class="opp-card ${accel?'accel':''}">
+      <div class="head">
+        <div class="arrow">${o.arrow||'→'}</div>
+        <div>
+          <div class="topic">${o.priority.toString().padStart(2,'0')} · ${o.topic}</div>
+          <div class="meta">${o.scene||''} · <span class="tag decision">${o.decision||''}</span></div>
+        </div>
+      </div>
+      <div class="cols">
+        <div>
+          <div class="lbl">赛道热度 / 竞品动作</div>
+          <div class="val">${o.heat||'—'}</div>
+          <div class="val" style="margin-top:8px">${(o.competitors||[]).join(' · ')}</div>
+        </div>
+        <div>
+          <div class="lbl">自有缺口 / 主推 SKU</div>
+          <div class="val">${o.gap||'—'}</div>
+          <div class="skus">${(o.yanxuan_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>
+          ${o.sell_anchor?`<div class="val" style="margin-top:6px;color:var(--accent)">${o.sell_anchor}</div>`:''}
+        </div>
+      </div>
+      <div class="play">
+        <b>信息流</b> ${o.play?.feed||'—'}<br>
+        <b>小红书</b> ${o.play?.xhs||'—'}<br>
+        <b>抖音</b> ${o.play?.dy||'—'}
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted)">暂无机会矩阵数据</p>';
+}
+
+function renderSceneLinks(){
+  const links = DATA.scene_links || [];
+  const tbody = document.querySelector('#sceneLinksTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML = links.length ? links.map(l=>`
+    <tr>
+      <td>${l.scene||'—'}</td>
+      <td><span style="font-weight:600">${l.trend_arrow||'→'}</span> ${l.topic||''}<div style="font-size:11px;color:var(--muted)">${l.trend_status||''}</div></td>
+      <td>${(l.competitors||[]).join(' · ')||'—'}</td>
+      <td>${(l.yanxuan_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join(' ')||'—'}</td>
+      <td>${l.decision||'—'}</td>
+    </tr>`).join('') : '<tr><td colspan="5" style="color:var(--muted)">暂无场景关联</td></tr>';
+}
+
+function renderFollowCandidates(){
+  const items = DATA.follow_candidates || [];
+  const block = document.getElementById('followBlock');
+  const el = document.getElementById('followCandidates');
+  if(!block || !el) return;
+  if(!items.length){
+    block.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  block.style.display = '';
+  el.innerHTML = items.map(f=>`
+    <div class="follow-item">
+      <div style="font-weight:600">${f.platform} · ${f.commerce_type} <span class="tag">${f.source}</span></div>
+      <div style="font-size:13px;margin:6px 0">${f.title}</div>
+      <div style="font-size:11px;color:var(--muted)">${f.why||''} · 赞 ${fmtPlain(f.likes)} · 关联竞品 ${(f.related_competitors||[]).join('、')||'—'}</div>
+      ${(f.yanxuan_skus||[]).length?`<div style="margin-top:6px">${f.yanxuan_skus.map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>`:''}
+    </div>`).join('');
+}
+
+function renderInsights(){
+  const o = DATA.overview;
+  const platform = o.insights_platform || (o.insights||[]).filter(i=>i.layer==='platform');
+  const brand = o.insights_brand || (o.insights||[]).filter(i=>i.layer==='brand');
+  const fallback = o.insights || [];
+  const renderGroup = (items, startIdx) => items.map((it,i)=>`
+    <li class="insight">
+      <div class="nb">${(startIdx+i+1).toString().padStart(2,'0')}</div>
+      <div class="body">
+        <div class="t">${it.title}</div>
+        <div class="ev">${it.evidence}</div>
+        <div class="act"><span class="arrow">→</span>${it.action}</div>
+      </div>
+    </li>`).join('');
+  document.getElementById('insightList').innerHTML = `
+    <div class="insight-group-label">全网热点洞察 · Platform</div>
+    <ul class="insight-list">${renderGroup(platform.length?platform:fallback.slice(0,3),0)}</ul>
+    <div class="insight-group-label">品牌决策洞察 · Brand</div>
+    <ul class="insight-list">${renderGroup(brand.length?brand:fallback.slice(3),platform.length||3)}</ul>`;
+}
+
+function renderTrends(){
+  const signals = DATA.overview.trend_signals || [];
+  document.getElementById('trendSignals').innerHTML = signals.map(s=>`
+    <div class="trend-signal ${s.arrow==='↑'?'up':''}">
+      <div class="arrow">${s.arrow||'→'}</div>
+      <div>
+        <div class="topic">${s.topic}</div>
+        <div class="status">${s.status||''}</div>
+        <div class="ev">${s.evidence||''}</div>
+        <div class="act">→ ${s.action||''}</div>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--muted)">暂无趋势信号</p>';
+
+  const xhsTrend = DATA.xhs.TREND_RANKS || [];
+  const dyTrend = DATA.dy.TREND_RANKS || [];
+  document.querySelector('#xhsTrendTable tbody').innerHTML = xhsTrend.slice(0,5).map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${r.velocity_label||'—'}</td>
+      <td>${r.publish_date||'—'}</td>
+      <td><span class="tag ${trendTagClass(r.trend_tag)}">${r.trend_tag||'—'}</span></td>
+    </tr>
+  `).join('');
+  document.querySelector('#dyTrendTable tbody').innerHTML = dyTrend.slice(0,5).map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${fmtPlain(r.likes)}</td>
+      <td><span class="tag ${trendTagClass(r.trend_tag)}">${r.trend_tag||'—'}</span></td>
+      <td><span class="tag dy">${r.category||''}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderXhs(){
+  const xhsTrend = DATA.xhs.TREND_RANKS || [];
+  const xhsHall = DATA.xhs.HALL_RANKS || DATA.xhs.RANKS || [];
+  document.querySelector('#xhsTrendFullTable tbody').innerHTML = xhsTrend.map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${r.velocity_label||'—'}</td>
+      <td class="num">${fmtPlain(r.likes)}</td>
+      <td>${r.publish_date||'—'}</td>
+      <td><span class="tag ${trendTagClass(r.trend_tag)}">${r.trend_tag||'—'}</span></td>
+      <td>${commerceBadge(r)}</td>
+      <td><span class="tag xhs">${r.cat}</span></td>
+    </tr>
+  `).join('');
+  document.querySelector('#xhsHallTable tbody').innerHTML = xhsHall.map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${fmtPlain(r.likes)}</td>
+      <td class="num">${fmtPlain(r.fav)}</td>
+      <td class="num">${r.days_live||'—'}天</td>
+      <td><span class="tag ${trendTagClass(r.trend_tag)}">${r.trend_tag||'—'}</span></td>
+      <td>${commerceBadge(r)}</td>
+      <td><span class="tag">${r.formula||'—'}</span></td>
+    </tr>
+  `).join('');
+  const xq = DATA.xhs.QUOTES || [];
+  document.getElementById('xhsQuotes').innerHTML = xq.slice(0,8).map(q=>`
+    <div class="quote xhs-tone">
+      <p>${q.text}</p>
+      <div class="src">${q.more||''} · ${q.src}</div>
+    </div>
+  `).join('');
+  const vd = DATA.xhs.DEMAND?.video || [];
+  const pd = DATA.xhs.DEMAND?.product || [];
+  document.getElementById('xhsDemandVideo').innerHTML = `
+    <h3>用户需求 → 视频方向</h3>
+    <ul>${vd.map(l=>`<li>${l}</li>`).join('') || '<li>暂无</li>'}</ul>`;
+  document.getElementById('xhsDemandProduct').innerHTML = `
+    <h3>用户需求 → 产品 / 商详方向</h3>
+    <ul>${pd.map(l=>`<li>${l}</li>`).join('') || '<li>暂无</li>'}</ul>`;
+  document.getElementById('xhsBrands').innerHTML = (DATA.xhs.BRANDS||[]).map(b=>`
+    <div class="brand-card xhs-tone ${b.active?'':'dead'}">
+      <div class="brand-head">
+        <div class="brand-name">${b.display||b.brand}</div>
+        <div class="brand-tagct">${b.active?`命中<b>${b.count}</b>篇`:'无爆款'}</div>
+      </div>
+      <div class="brand-title">${b.active?b.title:b.note}</div>
+      <div class="brand-stats">
+        <span><b>${b.likes}</b>赞</span>
+        <span><b>${b.cat}</b></span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDy(){
+  const dyTrend = DATA.dy.TREND_RANKS || [];
+  const dyHall = DATA.dy.HALL_RANKS || DATA.dy.category_top || [];
+  document.querySelector('#dyTrendFullTable tbody').innerHTML = dyTrend.map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${fmtPlain(r.likes)}</td>
+      <td class="num">${fmtPlain(r.shares)}</td>
+      <td><span class="tag ${trendTagClass(r.trend_tag)}">${r.trend_tag||'—'}</span></td>
+      <td>${commerceBadge(r)}</td>
+      <td><span class="tag hook">${r.hook}</span></td>
+    </tr>
+  `).join('');
+  document.querySelector('#dyHallTable tbody').innerHTML = dyHall.map(r=>`
+    <tr>
+      <td class="rank">${r.rank.toString().padStart(2,'0')}</td>
+      <td class="title">${r.title}</td>
+      <td class="num">${fmtPlain(r.likes)}</td>
+      <td class="num">${fmtPlain(r.shares)}</td>
+      <td>${r.duration||'—'}</td>
+      <td>${commerceBadge(r)}</td>
+      <td><span class="tag hook">${r.hook}</span></td>
+      <td><span class="tag dy">${r.category}</span></td>
+    </tr>
+  `).join('');
+  const hookItems = Object.entries(DATA.dy.hook_distribution).sort((a,b)=>b[1]-a[1]);
+  const max = Math.max(...hookItems.map(i=>i[1]));
+  document.getElementById('dyHookChart').innerHTML = hookItems.map(([k,v])=>{
+    const h = Math.max(8, (v/max)*120);
+    return `
+      <div class="bar-col">
+        <div class="bar-val">${v}</div>
+        <div class="bar dy-tone" style="height:${h}px"></div>
+        <div class="bar-label">${k}</div>
+      </div>
+    `;
+  }).join('');
+  const ss = DATA.dy.script_stats;
+  document.getElementById('dyScriptInfo').innerHTML = `
+    <div style="font-family:var(--serif-zh);font-weight:600;font-size:14px;color:var(--ink);margin-bottom:14px">脚本结构画像</div>
+    📐 <b>镜头中位数</b>：${ss.median_shots} 镜<br>
+    ⏱ <b>时长中位数</b>：${ss.median_duration_s} s<br>
+    🎯 <b>推荐档位</b>：<span style="color:var(--dy);font-weight:700">${ss.recommended_duration}</span><br>
+    <hr style="border:none;border-top:1px solid var(--rule);margin:14px 0">
+    <span style="color:var(--muted);font-size:13px">${(()=>{const h=hookItems[0];const o=DATA.dy.hook_distribution['其他']||0;const n=(DATA.dy.HALL_RANKS||DATA.dy.category_top||[]).length;if(o>=Math.ceil(n/2))return `"其他"钩子占多数（${o}/${n}），剧情化/生活流开场仍是主流。`;if(h)return `TOP 钩子「${h[0]}」${h[1]}/${n} 条——数字/教程/反差钩比硬广更有效。`;return '钩子分布见上图。';})()}</span>
+  `;
+  document.getElementById('dyQuotes').innerHTML = DATA.dy.pain_quotes.slice(0,6).map(q=>{
+    const m = q.text.match(/「([^」]*)」\s*—\s*(.+)/);
+    const text = m? m[1] : q.text;
+    const src = m? m[2] : '';
+    return `<div class="quote"><p>"${text}"</p><div class="src">${q.bucket} · ${src}</div></div>`;
+  }).join('');
+  document.getElementById('dyBrands').innerHTML = DATA.dy.brands.map(b=>{
+    const dead = b.top_likes==='—' || !b.top_likes;
+    return `
+      <div class="brand-card ${dead?'dead':''}">
+        <div class="brand-head">
+          <div class="brand-name">${b.brand}</div>
+          <div class="brand-tagct">挂tag<b>${b.tag_count}</b></div>
+        </div>
+        <div class="brand-title">${b.top_title}</div>
+        <div class="brand-stats">
+          <span><b>${b.top_likes}</b>赞</span>
+          <span><b>${b.duration}</b></span>
+          <span><b>${b.fans}</b>粉</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ 侧边栏点击跳转 + Active 高亮 ============
+function setupNav(){
+  const links = document.querySelectorAll('.nav a[data-target]');
+  links.forEach(a=>{
+    a.addEventListener('click', e=>{
+      e.preventDefault();
+      const id = a.dataset.target;
+      const el = document.getElementById(id);
+      if(el){
+        const top = el.getBoundingClientRect().top + window.scrollY - 16;
+        window.scrollTo({top, behavior:'smooth'});
+      }
+    });
+  });
+  // IntersectionObserver 高亮当前 section
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        const id = en.target.id;
+        links.forEach(a=>a.classList.toggle('active', a.dataset.target === id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+  sections.forEach(s=>observer.observe(s));
+  // back-top
+  window.addEventListener('scroll', ()=>{
+    document.getElementById('backTop').classList.toggle('show', window.scrollY > 600);
+  });
+}
+
+// ============ PPT 按钮：仅 ⌘/Ctrl 才打开 ============
+function pptClick(ev, url){
+  if(ev.metaKey || ev.ctrlKey || ev.button === 1) return true;
+  ev.preventDefault();
+  showHint();
+  return false;
+}
+function showHint(){
+  const t = document.getElementById('toast');
+  const isMac = /Mac/.test(navigator.platform);
+  t.innerHTML = `打开深度阅读版<br><span class="accent">请按 <b>${isMac?'⌘ Cmd':'Ctrl'}</b> + 鼠标点击</span><br><span style="font-size:12px;opacity:.7">将在新 tab 打开，不影响当前主入口</span>`;
+  t.classList.add('show');
+  clearTimeout(window._hintT);
+  window._hintT = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function renderDirections(){
+  const items = DATA.directions || [];
+  document.getElementById('monthlyDirections').innerHTML = items.map((d,i)=>`
+    <div class="direction-card">
+      <div class="head">
+        <div class="topic">${(i+1).toString().padStart(2,'0')} · ${d.topic}</div>
+        <div class="heat">${d.heat||''}</div>
+      </div>
+      ${d.discussion?`<div class="discuss">${d.discussion}</div>`:''}
+      <div class="cols">
+        <div>
+          <div class="lbl">对应 brief 商品</div>
+          <div class="skus">${(d.products||[]).map(p=>`
+            <div class="sku">
+              <div class="sku-name">${p.name}${p.priority?'<span class="sku-pri">重点品</span>':''}</div>
+              <div class="sku-meta">${p.spuid?`SPU ${p.spuid}`:'SPU —'}${p.nickname?` · ${p.nickname}`:''}${p.series?` · ${p.series}`:''}</div>
+              ${p.tagline?`<div class="sku-tag">${p.tagline}</div>`:''}
+            </div>`).join('')}</div>
+        </div>
+        <div>
+          <div class="lbl">推荐内容方向</div>
+          <div class="content-dir">
+            <p><b>小红书</b>　${d.content?.xhs||'—'}</p>
+            <p><b>抖音</b>　${d.content?.dy||'—'}</p>
+            <p><b>信息流</b>　${d.content?.feed||'—'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--muted)">暂无建议方向数据</p>';
+}
+
+renderOverview();
+renderCompetitors();
+renderOpportunity();
+renderSceneLinks();
+renderFollowCandidates();
+renderTrends();
+renderInsights();
+renderXhs();
+renderDy();
+renderDirections();
+setupNav();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.zip
+
+# Generated data (large / may contain platform content)
+data/xhs-monthly/*
+!data/xhs-monthly/.gitkeep
+data/douyin-monthly/*
+!data/douyin-monthly/.gitkeep
+archive/
+
+# Local brief with internal SKU (keep templates/brief/*.example only)
+templates/brief/*.json
+!templates/brief/*.example.json
+
+# Editor
+.cursor/
