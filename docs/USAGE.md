@@ -18,12 +18,9 @@
 | 准备项 | 说明 | 没有会怎样 |
 |--------|------|------------|
 | **Python 3.10+** | 跑脚本 | 无法执行 |
-| **TikHub API Key** | [TikHub](https://tikhub.io) 付费，拉 XHS/DY 数据 | 小红书/抖音都拉不动 |
+| **TikHub API Key** | [TikHub 注册](https://user.tikhub.io/register?ref=YS1mhMDA)（推荐码 `YS1mhMDA`）· 付费，拉 XHS/DY 数据 | 小红书/抖音都拉不动 |
 | **social-ecom-decoder** | 本地装好的上游项目，提供 `douyin-pulse` 命令 | 抖音侧 merge 会跳过 |
 | **niche_config.py** | 从 example 复制并填写 | 用的是占位示例品牌 |
-
-还没有 TikHub 账号？推荐注册（推荐码 `YS1mhMDA`）：  
-https://user.tikhub.io/register?ref=YS1mhMDA
 
 TikHub Key 放这里（二选一）：
 

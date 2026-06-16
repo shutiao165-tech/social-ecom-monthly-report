@@ -11,8 +11,6 @@
 
 本仓库**不包含**任何真实品类、品牌或 SKU 数据；fork 后只需改 `config/niche_config.py`。
 
-**TikHub 注册（推荐码 `YS1mhMDA`）**：https://user.tikhub.io/register?ref=YS1mhMDA
-
 ---
 
 ## 文档（建议先看）
@@ -65,6 +63,7 @@ cp config/niche_config.example.py config/niche_config.py
 # 编辑 config/niche_config.py
 
 mkdir -p ~/.config/tikhub && echo "YOUR_TIKHUB_KEY" > ~/.config/tikhub/key
+# 还没有 Key？[TikHub 注册](https://user.tikhub.io/register?ref=YS1mhMDA) · 推荐码 YS1mhMDA
 export SOCIAL_ECOM_DECODER=~/.claude/skills/social-ecom-decoder
 
 # ① 在上游跑 douyin-pulse（品类 + 品牌）— 见 docs/USAGE.md 第 3 步

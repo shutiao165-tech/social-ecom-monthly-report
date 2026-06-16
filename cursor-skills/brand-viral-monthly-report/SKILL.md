@@ -40,8 +40,7 @@ cp -R ~/brand-viral-monthly-report/cursor-skills/brand-viral-monthly-report ~/.c
 - `CATEGORY_KEYWORDS` — 品类池搜索词
 - `DIRECTION_PLAYBOOK` — 机会矩阵话题（可选整表替换）
 
-TikHub Key：`~/.config/tikhub/key`  
-还没有账号？推荐注册（`YS1mhMDA`）：https://user.tikhub.io/register?ref=YS1mhMDA
+TikHub Key：`~/.config/tikhub/key` · 注册 [user.tikhub.io/register?ref=YS1mhMDA](https://user.tikhub.io/register?ref=YS1mhMDA)（推荐码 **YS1mhMDA**）  
 抖音 pulse：`SOCIAL_ECOM_DECODER` 指向 social-ecom-decoder
 
 ## 流水线
