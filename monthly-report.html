@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>家清爆款月报 · 双平台一体化</title>
+<title>品牌内容爆款月报 · 小红书 × 抖音</title>
 <style>
 :root{
   /* 🌿 森林墨配色，呼应翻页演讲版 */
@@ -300,7 +300,7 @@ td.author{color:var(--muted);font-size:12px;max-width:140px;overflow:hidden;text
   <aside class="sidebar">
     <div class="sidebar-head">
       <div class="mono">FY26 · Brand Intel</div>
-      <h2>家清品牌月报</h2>
+      <h2>品牌内容月报</h2>
       <div class="sub">05.17 – 06.15 · 近 30 天</div>
     </div>
     <nav class="nav">
@@ -336,9 +336,9 @@ td.author{color:var(--muted);font-size:12px;max-width:140px;overflow:hidden;text
 
   <main class="main">
     <div class="doc-head">
-      <div class="kicker">Vol. 01 · 家清品类 · 品牌情报</div>
-      <h1>家清品牌月报<br><span style="font-size:22px;font-weight:400;color:var(--muted)">趋势监测 × 竞品动作 × 自有机会</span></h1>
-      <p class="lead" id="docLead">从品牌经营视角解读家清赛道：哪些场景在升温、竞品在做什么、自有该跟不跟、主推哪个 SKU。数据覆盖小红书 + 抖音近 30 天监测词与 8 个竞品品牌。</p>
+      <div class="kicker">Vol. 01 · 示例赛道 · 品牌情报</div>
+      <h1>品牌内容月报<br><span style="font-size:22px;font-weight:400;color:var(--muted)">趋势监测 × 竞品动作 × 自有机会</span></h1>
+      <p class="lead" id="docLead">从品牌经营视角解读示例赛道：哪些场景在升温、竞品在做什么、自有该跟不跟、主推哪个 SKU。数据覆盖小红书 + 抖音近 30 天监测词与 8 个竞品品牌。</p>
     </div>
 
     <!-- §1 品牌简报 -->
@@ -545,7 +545,7 @@ td.author{color:var(--muted);font-size:12px;max-width:140px;overflow:hidden;text
 <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-const DATA = {"xhs":{"RANKS":[],"TREND_RANKS":[],"HALL_RANKS":[],"BRANDS":[],"QUOTES":[],"DEMAND":{"video":[],"product":[]},"CATS":[]},"dy":{"category_top":[],"brands":[],"TREND_RANKS":[],"HALL_RANKS":[]},"overview":{"headline":"运行 pipeline 后自动填充"},"competitor_actions":[],"opportunity_matrix":[],"scene_links":[],"follow_candidates":[],"yanxuan_voice":{"status":"待生成"},"directions":[]};
+const DATA = {"xhs":{"RANKS":[],"TREND_RANKS":[],"HALL_RANKS":[],"BRANDS":[],"QUOTES":[],"DEMAND":{"video":[],"product":[]},"CATS":[]},"dy":{"category_top":[],"brands":[],"TREND_RANKS":[],"HALL_RANKS":[]},"overview":{"headline":"运行 pipeline 后自动填充"},"competitor_actions":[],"opportunity_matrix":[],"scene_links":[],"follow_candidates":[],"own_brand_voice":{"status":"待配置"},"directions":[]};
 
 function fmt(n){
   if(n==null) return '—';
@@ -591,7 +591,7 @@ function renderOverview(){
   const o = DATA.overview;
   const bk = o.brand_kpi || {};
   const pk = o.platform_kpi || {};
-  const yv = DATA.yanxuan_voice || o.yanxuan_voice || {};
+  const yv = DATA.own_brand_voice || o.own_brand_voice || {};
   const xhsTrend = o.xhs_trend_top1 || {};
   const xhsHall = o.xhs_hall_top1 || {};
   const dyTrend = o.dy_trend_top1 || {};
@@ -633,7 +633,7 @@ function renderOverview(){
   document.getElementById('brandKpiRow').innerHTML = `
     <div class="kpi accent-tone">
       <div class="label">自有社媒声量</div>
-      <div class="value" style="font-size:22px;font-family:var(--serif-zh)">${yv.status||bk.yanxuan_status||'—'}</div>
+      <div class="value" style="font-size:22px;font-family:var(--serif-zh)">${yv.status||bk.own_brand_status||'—'}</div>
       <div class="sub">品牌代表片合计 ${fmtPlain(yv.total_likes||0)} 赞</div>
     </div>
     <div class="kpi">
@@ -740,7 +740,7 @@ function renderOpportunity(){
         <div>
           <div class="lbl">自有缺口 / 主推 SKU</div>
           <div class="val">${o.gap||'—'}</div>
-          <div class="skus">${(o.yanxuan_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>
+          <div class="skus">${(o.own_brand_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>
           ${o.sell_anchor?`<div class="val" style="margin-top:6px;color:var(--accent)">${o.sell_anchor}</div>`:''}
         </div>
       </div>
@@ -762,7 +762,7 @@ function renderSceneLinks(){
       <td>${l.scene||'—'}</td>
       <td><span style="font-weight:600">${l.trend_arrow||'→'}</span> ${l.topic||''}<div style="font-size:11px;color:var(--muted)">${l.trend_status||''}</div></td>
       <td>${(l.competitors||[]).join(' · ')||'—'}</td>
-      <td>${(l.yanxuan_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join(' ')||'—'}</td>
+      <td>${(l.own_brand_skus||[]).map(s=>`<span class="sku-chip">${s}</span>`).join(' ')||'—'}</td>
       <td>${l.decision||'—'}</td>
     </tr>`).join('') : '<tr><td colspan="5" style="color:var(--muted)">暂无场景关联</td></tr>';
 }
@@ -783,7 +783,7 @@ function renderFollowCandidates(){
       <div style="font-weight:600">${f.platform} · ${f.commerce_type} <span class="tag">${f.source}</span></div>
       <div style="font-size:13px;margin:6px 0">${f.title}</div>
       <div style="font-size:11px;color:var(--muted)">${f.why||''} · 赞 ${fmtPlain(f.likes)} · 关联竞品 ${(f.related_competitors||[]).join('、')||'—'}</div>
-      ${(f.yanxuan_skus||[]).length?`<div style="margin-top:6px">${f.yanxuan_skus.map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>`:''}
+      ${(f.own_brand_skus||[]).length?`<div style="margin-top:6px">${f.own_brand_skus.map(s=>`<span class="sku-chip">${s}</span>`).join('')}</div>`:''}
     </div>`).join('');
 }
 

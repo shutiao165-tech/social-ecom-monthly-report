@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 家清月报标准流水线（方案 C）
+# 双平台品牌内容爆款月报 — 标准流水线（方案 C：双池 + 关联层）
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DECODER="${SOCIAL_ECOM_DECODER:-$HOME/.claude/skills/social-ecom-decoder}"

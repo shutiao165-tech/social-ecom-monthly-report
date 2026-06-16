@@ -15,39 +15,23 @@ sys.path.insert(0, str(SKILL_ROOT))
 
 from shared.lib import analyze  # noqa: E402
 from commerce_detect import merge_commerce_record, parse_xhs_note_info  # noqa: E402
-from brand_config import xhs_brand_keywords_flat  # noqa: E402
+from brand_config import (  # noqa: E402
+    BRAND_CANONICAL,
+    CATEGORY_KEYWORDS,
+    CONTENT_CATEGORIES,
+    PAIN_BUCKETS,
+    xhs_brand_keywords_flat,
+)
 
-CATEGORY_KEYWORDS = [
-    "除湿袋", "空气清新剂", "除甲醛", "冰箱除味剂", "厕所香薰", "除湿盒",
-    "消毒喷雾", "冰箱清洁剂", "鞋柜除臭神器", "洗洁精", "空调清洗剂",
-    "洁厕灵", "洗衣机清洗剂", "马桶清洁剂", "管道疏通剂", "地板清洁剂",
-    "下水道强力疏通剂", "油污净", "洁厕宝",
-]
 BRAND_KEYWORDS = xhs_brand_keywords_flat()
 KEYWORDS = list(dict.fromkeys(CATEGORY_KEYWORDS + BRAND_KEYWORDS))
 
-JIAQING_CATEGORIES = [
-    ("好物推荐", ["好物", "爱用", "推荐", "清单", "种草", "年度", "补货", "同款", "分享"]),
-    ("卫生间清洁", ["马桶", "洁厕", "厕所", "浴室", "卫生间", "淋浴", "挂厕", "洁厕宝", "洁厕灵"]),
-    ("厨房清洁", ["厨房", "油污", "灶台", "冰箱", "抽油烟", "油污净"]),
-    ("除味香氛", ["香薰", "除臭", "除味", "香氛", "留香", "空气清新", "鞋柜"]),
-    ("洗衣液", ["洗衣", "洗衣液", "凝珠", "威露士", "清洗剂"]),
-    ("清洁妙招", ["妙招", "一招", "别买", "省钱", "碱", "白醋", "听劝"]),
-    ("管道疏通", ["疏通", "下水道", "管道", "堵塞"]),
-    ("除湿除霉", ["除湿", "霉", "回南", "潮湿", "除湿袋", "除湿盒"]),
-    ("品牌竞品", ["网易严选", "沫檬", "老管家", "滴露", "椰放", "蔬果园", "水卫士", "晴天大白", "papi", "维嘉"]),
-]
-
-JIAQING_PAIN_BUCKETS = [
-    ("异味困扰", ["臭", "味", "气味", "霉味", "汗味", "下水道", "回潮", "潮", "刺鼻"]),
-    ("清洁残留", ["残留", "划痕", "擦不掉", "刷不干净", "漂不干净", "残胶", "痕迹"]),
-    ("操作麻烦", ["麻烦", "费力", "费劲", "懒得", "懒人", "手动", "搓", "刷"]),
-    ("效果质疑", ["有用", "鸡肋", "智商税", "效果", "立竿见影", "没效果", "踩雷"]),
-    ("安全顾虑", ["刺激", "化学", "致癌", "母婴", "孩子", "宝宝", "孕", "有害"]),
-    ("价格敏感", ["贵", "便宜", "性价比", "白买", "肉疼", "链接", "多少钱"]),
-    ("香味偏好", ["香", "味道", "留香", "好闻", "难闻", "呛"]),
-    ("求购链接", ["链接", "求购", "哪里买", "姐妹", "同款", "蹲"]),
-]
+# 注入品牌名到「品牌竞品」分类
+NICHE_CATEGORIES = []
+for label, kws in CONTENT_CATEGORIES:
+    if label == "品牌竞品":
+        kws = list(dict.fromkeys(list(kws) + BRAND_CANONICAL))
+    NICHE_CATEGORIES.append((label, kws))
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "data" / "xhs-monthly"
 WINDOW_DAYS = 30
@@ -312,8 +296,8 @@ def main():
         platform_pool,
         keywords=KEYWORDS,
         top_n=TOP_N,
-        pain_buckets=JIAQING_PAIN_BUCKETS,
-        categories=JIAQING_CATEGORIES,
+        pain_buckets=PAIN_BUCKETS,
+        categories=NICHE_CATEGORIES,
         report_date=_today_cst(),
         fresh_window_days=WINDOW_DAYS,
         fresh_top_n=10,

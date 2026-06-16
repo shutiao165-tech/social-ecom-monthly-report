@@ -8,11 +8,7 @@ from typing import Any
 COMMERCE_ACTIONABLE = {"已挂商品", "品牌合作"}
 
 
-def _norm_brand(name: str) -> str:
-    n = (name or "").strip()
-    if "网易严选" in n:
-        return "网易严选"
-    return n.replace("网易严选家清", "").replace("网易严选香氛", "").strip() or n
+from brand_config import norm_brand_key as _norm_brand
 
 
 def _match_playbook(topic: str, scene: str, playbook: list) -> dict | None:
@@ -61,7 +57,7 @@ def build_scene_links(
             "trend_arrow": sig.get("arrow", "→") if sig else opp.get("arrow", "→"),
             "trend_status": sig.get("status", "") if sig else "",
             "competitors": list(dict.fromkeys(matched))[:4] or opp.get("competitors", [])[:3],
-            "yanxuan_skus": opp.get("yanxuan_skus", [])[:3],
+            "own_brand_skus": opp.get("own_brand_skus", [])[:3],
             "decision": opp.get("decision", ""),
             "bridge": "场景匹配（非同视频求交）",
         })
@@ -108,7 +104,7 @@ def build_follow_candidates(
             "velocity_label": r.get("velocity_label", ""),
             "scene": scene,
             "related_competitors": link.get("competitors", [])[:3],
-            "yanxuan_skus": link.get("yanxuan_skus", [])[:2],
+            "own_brand_skus": link.get("own_brand_skus", [])[:2],
             "why": f"{platform} 品类池 · {ct} · {source}",
         })
 

@@ -16,8 +16,22 @@ from commerce_detect import (  # noqa: E402
     summarize_commerce,
 )
 from competitor_enrich import enrich_clip  # noqa: E402
-from brand_config import BRAND_CANONICAL, BRAND_SEARCH_KEYWORDS, keywords_for_brand  # noqa: E402
+from brand_config import (  # noqa: E402
+    BRAND_CANONICAL,
+    BRAND_SCENE_HINTS,
+    BRAND_SEARCH_KEYWORDS,
+    DEFAULT_SCENE,
+    DIRECTION_PLAYBOOK,
+    NICHE_LABEL,
+    OWN_BRAND,
+    OWN_BRAND_ALIASES,
+    OWN_BRAND_DISPLAY,
+    is_own_brand,
+    keywords_for_brand,
+    norm_brand_key,
+)
 from env_paths import HTML_OUTPUT  # noqa: E402
+from load_niche import format_report_copy  # noqa: E402
 
 try:
     from merge_douyin_pulse import rebuild_dy_brands, _find_latest_pulse_raw  # noqa: E402
@@ -539,9 +553,7 @@ def build_xhs(data: dict) -> dict:
 
 XHS_BRAND_NAMES = BRAND_CANONICAL
 
-XHS_BRAND_ALIASES: dict[str, list[str]] = {
-    "网易严选": ["网易严选", "网易严选家清", "网易严选香氛", "严选"],
-}
+XHS_BRAND_NAMES = BRAND_CANONICAL
 
 
 def _note_mentions_brand(note: dict, name: str) -> bool:
@@ -549,8 +561,8 @@ def _note_mentions_brand(note: dict, name: str) -> bool:
     text = f"{note.get('title') or ''} {note.get('content_excerpt') or ''}"
     if name in text:
         return True
-    if name == "网易严选":
-        return any(a in text for a in XHS_BRAND_ALIASES["网易严选"])
+    if is_own_brand(name):
+        return any(a in text for a in OWN_BRAND_ALIASES if a)
     for kw in keywords_for_brand(name):
         if kw != name and kw in text:
             return True
@@ -563,7 +575,7 @@ def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None
     notes = merged_raw.get("notes") or []
     brands = []
     for name in XHS_BRAND_NAMES:
-        display = "网易严选家清" if name == "网易严选" else name
+        display = OWN_BRAND_DISPLAY if is_own_brand(name) else name
         hits = [n for n in notes if _note_mentions_brand(n, name)]
         hits.sort(key=lambda x: x.get("likes", 0), reverse=True)
         top_notes_raw = hits[:5]
@@ -588,7 +600,7 @@ def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None
             if not comm.get("commerce_type"):
                 comm = merge_commerce_record("xhs", {}, title, n.get("top_comments") or [])
             top_notes.append(_enrich_platform_clip(
-                title, _norm_brand_key(name), comm, "xiaohongshu",
+                title, norm_brand_key(name), comm, "xiaohongshu",
                 likes=n.get("likes", 0),
                 likes_label=_fmt(n.get("likes", 0)),
                 category=n.get("category", ""),
@@ -597,7 +609,7 @@ def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None
         best = top_notes_raw[0]
         lead = top_notes[0]
         brands.append({
-            "brand": _norm_brand_key(name),
+            "brand": norm_brand_key(name),
             "display": display,
             "active": True,
             "count": len(hits),
@@ -665,30 +677,15 @@ def _shared_cats(xhs_cats: list, dy_dist: dict) -> list:
     return list(dict.fromkeys(overlap))[:3]
 
 
-YANXUAN_NAMES = {"网易严选", "网易严选香氛", "网易严选家清", "严选"}
-
-# 品牌 → 主战场场景（用于动作板归类）
-_BRAND_SCENE_HINTS: dict[str, str] = {
-    "椰放": "卫生间/空间除味",
-    "沫檬": "地板清洁",
-    "晴天大白": "车载香氛",
-    "滴露": "消毒/除菌",
-    "蔬果园": "香氛/洗洁精",
-    "水卫士": "马桶/家清",
-    "老管家": "洗衣机槽清洁",
-    "网易严选": "香氛/家清全品类",
-}
+_BRAND_SCENE_HINTS = BRAND_SCENE_HINTS
 
 
 def _norm_brand_key(name: str) -> str:
-    n = (name or "").strip()
-    if "网易严选" in n or n == "严选":
-        return "网易严选"
-    return n.replace("网易严选家清", "").replace("网易严选香氛", "").strip() or n
+    return norm_brand_key(name)
 
 
-def _is_yanxuan(name: str) -> bool:
-    return _norm_brand_key(name) == "网易严选"
+def _is_own_brand(name: str) -> bool:
+    return is_own_brand(name)
 
 
 def _infer_scene(title: str, cat: str = "") -> str:
@@ -698,7 +695,7 @@ def _infer_scene(title: str, cat: str = "") -> str:
             return pb["topic"].split("/")[0].strip()
     if cat and cat not in ("其他", "好物推荐", "品牌竞品"):
         return cat
-    return "家清综合"
+    return DEFAULT_SCENE
 
 
 def _infer_tactic(title: str, hook: str = "", platform: str = "") -> str:
@@ -718,8 +715,8 @@ def _infer_tactic(title: str, hook: str = "", platform: str = "") -> str:
     return "好物测评体"
 
 
-def _threat_level(score: int, is_yanxuan: bool = False) -> str:
-    if is_yanxuan:
+def _threat_level(score: int, is_self: bool = False) -> str:
+    if is_self:
         return "自有"
     if score >= 5000:
         return "高"
@@ -844,7 +841,7 @@ def build_competitor_actions(
             scene = entry["xhs"].get("scene") or ""
         if not scene and entry.get("dy"):
             scene = entry["dy"].get("scene") or ""
-        scene = scene or _BRAND_SCENE_HINTS.get(key, "家清综合")
+        scene = scene or _BRAND_SCENE_HINTS.get(key, DEFAULT_SCENE)
 
         platforms = []
         if entry.get("xhs"):
@@ -852,7 +849,7 @@ def build_competitor_actions(
         if entry.get("dy"):
             platforms.append("抖音")
 
-        if _is_yanxuan(key):
+        if _is_own_brand(key):
             if total <= 0:
                 implication = "双平台品牌内容近乎失语，竞品在抢场景声量"
                 status = "失语"
@@ -880,7 +877,7 @@ def build_competitor_actions(
             else:
                 implication = (
                     f"{top_plat} {scene} 占位（{_fmt(top_likes)} 赞"
-                    f"{f'·{prod_hint}' if prod_hint else ''}），严选需差异化切入同场景"
+                    f"{f'·{prod_hint}' if prod_hint else ''}），{OWN_BRAND}需差异化切入同场景"
                 )
             status = "活跃"
 
@@ -910,9 +907,9 @@ def build_competitor_actions(
 
         actions.append({
             "brand": key,
-            "is_self": _is_yanxuan(key),
+            "is_self": _is_own_brand(key),
             "status": status,
-            "threat": _threat_level(total, _is_yanxuan(key)),
+            "threat": _threat_level(total, _is_own_brand(key)),
             "scene": scene,
             "platforms": platforms,
             "total_likes": total,
@@ -945,9 +942,9 @@ def build_opportunity_matrix(
     competitor_actions: list,
     trend_signals: list,
 ) -> list:
-    """严选机会矩阵：趋势 × 竞品空白 × SKU × 品牌决策。"""
+    """自有品牌机会矩阵：趋势 × 竞品空白 × SKU × 品牌决策。"""
     competitors = [a for a in competitor_actions if not a["is_self"]]
-    yanxuan = next((a for a in competitor_actions if a["is_self"]), None)
+    own_brand = next((a for a in competitor_actions if a["is_self"]), None)
     trend_map = {t["topic"]: t for t in trend_signals}
 
     rows = []
@@ -981,16 +978,16 @@ def build_opportunity_matrix(
             comp_lines.append(f"{c['brand']} {_fmt(c['total_likes'])}赞")
             max_comp_likes = max(max_comp_likes, c["total_likes"])
 
-        yanxuan_likes = yanxuan["total_likes"] if yanxuan else 0
+        own_likes = own_brand["total_likes"] if own_brand else 0
 
         ts = next((t for t in trend_signals if topic.split("/")[0].strip() in t.get("topic", "")), None)
         arrow = ts["arrow"] if ts else "→"
 
-        if yanxuan_likes <= 0 and max_comp_likes >= 1000:
-            gap = "严选本月无声，竞品已占位"
+        if own_likes <= 0 and max_comp_likes >= 1000:
+            gap = f"{OWN_BRAND}本月无声，竞品已占位"
             decision = "加速切入"
-        elif yanxuan_likes < max_comp_likes * 0.1 and max_comp_likes > 500:
-            gap = f"严选弱声（{_fmt(yanxuan_likes)} vs 竞品 {_fmt(max_comp_likes)}）"
+        elif own_likes < max_comp_likes * 0.1 and max_comp_likes > 500:
+            gap = f"{OWN_BRAND}弱声（{_fmt(own_likes)} vs 竞品 {_fmt(max_comp_likes)}）"
             decision = "差异化跟打"
         elif arrow == "↑":
             gap = "赛道升温，品牌窗口期"
@@ -1012,7 +1009,7 @@ def build_opportunity_matrix(
             "competitors": comp_lines or ["本月无明确竞品占位"],
             "gap": gap,
             "decision": decision,
-            "yanxuan_skus": sku_names,
+            "own_brand_skus": sku_names,
             "sell_anchor": d.get("sell_anchor", ""),
             "play": {
                 "feed": (d.get("content") or {}).get("feed", ""),
@@ -1024,17 +1021,17 @@ def build_opportunity_matrix(
     return rows
 
 
-def build_yanxuan_voice(competitor_actions: list) -> dict:
-    yanxuan = next((a for a in competitor_actions if a["is_self"]), None)
-    if not yanxuan:
-        return {"status": "未监测", "summary": "未找到严选品牌数据", "total_likes": 0}
+def build_own_brand_voice(competitor_actions: list) -> dict:
+    own = next((a for a in competitor_actions if a["is_self"]), None)
+    if not own:
+        return {"status": "未监测", "summary": f"未找到{OWN_BRAND}品牌数据", "total_likes": 0}
     return {
-        "status": yanxuan["status"],
-        "summary": yanxuan["implication"],
-        "total_likes": yanxuan["total_likes"],
-        "xhs": yanxuan.get("xhs"),
-        "dy": yanxuan.get("dy"),
-        "threat": yanxuan["threat"],
+        "status": own["status"],
+        "summary": own["implication"],
+        "total_likes": own["total_likes"],
+        "xhs": own.get("xhs"),
+        "dy": own.get("dy"),
+        "threat": own["threat"],
     }
 
 
@@ -1047,7 +1044,7 @@ def build_overview(
     trend_signals: list,
     competitor_actions: list,
     opportunity_matrix: list,
-    yanxuan_voice: dict,
+    own_brand_voice: dict,
     commerce_summary: dict | None = None,
 ) -> dict:
     meta_x = xhs_data.get("_meta") or {}
@@ -1124,10 +1121,10 @@ def build_overview(
     insights_brand = [
         {
             "layer": "brand",
-            "title": "严选本月社媒声量偏弱，竞品在抢场景",
+            "title": f"{OWN_BRAND}本月社媒声量偏弱，竞品在抢场景",
             "evidence": (
-                f"严选「{yanxuan_voice.get('status', '—')}」"
-                f"（双平台品牌代表片合计 {_fmt(yanxuan_voice.get('total_likes', 0))} 赞）"
+                f"{OWN_BRAND}「{own_brand_voice.get('status', '—')}」"
+                f"（双平台品牌代表片合计 {_fmt(own_brand_voice.get('total_likes', 0))} 赞）"
                 + (f"；监测范围内声量最高 {top_comp['brand']} {_fmt(top_comp['total_likes'])} 赞" if top_comp else "")
             ),
             "action": "见 §03 机会矩阵；补品牌内容/投放，不只跟 UGC",
@@ -1155,17 +1152,17 @@ def build_overview(
 
     data_methodology = {
         "platform_pool": (
-            "品类词（除湿/马桶/油污净等）每词 TOP30 翻页搜索，合并去重后按总赞/增速排序——"
-            "反映全网家清热点，不强制出现品牌名"
+            "品类词（见 niche_config.CATEGORY_KEYWORDS）每词 TOP30 翻页搜索，合并去重后按总赞/增速排序——"
+            f"反映全网{NICHE_LABEL}热点，不强制出现品牌名"
         ),
         "brand_pool": (
-            "品牌词（沫檬/滴露/严选等）搜索 + 标题/正文含品牌名；每品牌保留 TOP3–5 代表片——"
+            "品牌词搜索 + 标题/正文含品牌名；每品牌保留 TOP3–5 代表片——"
             "反映品牌动作与挂车，不代表品牌全网最高声量"
         ),
         "commerce_review": "商业复核：品类榜 TOP10 + 品牌代表片全量 API 打标",
         "scene_links": "关联层 scene_links：趋势场景 × 竞品 × SKU（非同视频求交）",
         "follow_candidates": "可跟投子集：品类热点 ∩ 已确认挂品/挂车（可为空）",
-        "do_not_mix": "勿用品牌代表片赞数与邪修清洁等 UGC 爆款直接比大小",
+        "do_not_mix": "勿用品牌代表片赞数与品类 UGC 爆款直接比大小",
     }
 
     return {
@@ -1192,13 +1189,13 @@ def build_overview(
             "extra": f"作者 {dy_top.get('author', '')}",
         },
         "trend_signals": trend_signals,
-        "yanxuan_voice": yanxuan_voice,
+        "own_brand_voice": own_brand_voice,
         "brand_kpi": {
             "competitor_active": len(active_comps),
             "competitor_cart": len(cart_comps),
             "opportunity_accel": len(accel_ops),
             "rising_trends": len([t for t in trend_signals if t.get("arrow") == "↑"]),
-            "yanxuan_status": yanxuan_voice.get("status", "—"),
+            "own_brand_status": own_brand_voice.get("status", "—"),
             "xhs_cart": (commerce_summary or {}).get("xhs", {}).get("挂品挂车", 0),
             "dy_cart": (commerce_summary or {}).get("dy", {}).get("挂品挂车", 0),
         },
@@ -1225,105 +1222,7 @@ def build_overview(
     }
 
 
-# 话题 playbook：信号词 → 单品 → 分平台内容方向
-_DIRECTION_PLAYBOOK = [
-    {
-        "id": "xieqiu",
-        "topic": "邪修清洁 / 低成本清洁偏方",
-        "signals": ["邪修", "清洁妙招", "0成本", "牙膏", "偏方", "懒人"],
-        "pain_keys": ["操作麻烦", "价格敏感"],
-        "cats": ["清洁妙招", "好物推荐"],
-        "dy_cats": ["清洁妙招", "厨房清洁"],
-        "brief_id": "xieqiu",
-        "xhs": "清单体图文：多场景「邪修」对比实测，强调可收藏照做步骤",
-        "dy": "数字钩 + 前后对比：「N 个 0 成本清洁大法」快切实拍",
-        "feed": "30–50s：评论原话反问开头 → 3 镜演示 → 口播利益点",
-    },
-    {
-        "id": "toilet_odor",
-        "topic": "卫生间除臭 / 马桶清洁",
-        "signals": ["马桶", "厕所", "滂臭", "尿垢", "洁厕", "异味", "臭"],
-        "pain_keys": ["异味困扰", "操作麻烦", "求购链接"],
-        "cats": ["卫生间清洁"],
-        "dy_cats": [],
-        "brief_id": "toilet_odor",
-        "xhs": "避雷/种草体：一次性马桶刷 vs 免刷洁厕液，评论区引导晒图",
-        "dy": "痛点钩：「夏天厕所滂臭」实拍 + 使用前后对比",
-        "feed": "首帧异味场景 + 花王/免刷类竞品对标话术（严选差异化卖点）",
-    },
-    {
-        "id": "kitchen_oil",
-        "topic": "厨房油污 / 重油污清洁",
-        "signals": ["厨房", "油污", "油烟机", "灶台", "油污净"],
-        "pain_keys": ["效果质疑", "操作麻烦"],
-        "cats": ["厨房清洁", "好物推荐"],
-        "dy_cats": ["厨房清洁"],
-        "brief_id": "kitchen_oil",
-        "xhs": "保姆教程体：水槽/灶台清洁步骤，收藏向",
-        "dy": "「10 个厨房爽点好物」清单钩 + ASMR 清洁音效",
-        "feed": "塑料袋/老偏方 vs 专业油污净 A/B 对比（呼应抖音评论质疑）",
-    },
-    {
-        "id": "dehumid",
-        "topic": "梅雨季除湿 / 防潮除霉",
-        "signals": ["除湿", "梅雨", "潮湿", "回南", "霉", "氯化钙"],
-        "pain_keys": ["异味困扰"],
-        "cats": ["除湿除霉"],
-        "dy_cats": ["除湿除霉"],
-        "brief_id": "dehumid",
-        "xhs": "季节预警体：「梅雨季要来了」备货款清单",
-        "dy": "反差钩：「真没想到除湿盒积了这么多水」开箱实测",
-        "feed": "教程钩 25–35s：宿舍/衣柜/鞋柜三场景除湿演示",
-    },
-    {
-        "id": "scent",
-        "topic": "空间除味 / 香氛体香",
-        "signals": ["香薰", "除味", "体香", "香氛", "鞋柜", "车载", "夯爆了"],
-        "pain_keys": ["香味偏好", "异味困扰"],
-        "cats": ["除味香氛"],
-        "dy_cats": [],
-        "brief_id": "scent",
-        "xhs": "概念词标题：「体香」「厕所祛味」情绪种草，对标椰放/蔬果园叙事",
-        "dy": "场景钩：车里/衣柜/卫生间三处扩香，41s 短平快",
-        "feed": "痛点开头「夏天车里异味」→ 产品特写 → 多场景蒙太奇",
-    },
-    {
-        "id": "formaldehyde",
-        "topic": "新房除甲醛 / 入住加速",
-        "signals": ["甲醛", "入住", "装修", "新房", "通风"],
-        "pain_keys": ["安全顾虑", "效果质疑"],
-        "cats": ["其他"],
-        "dy_cats": ["除甲醛"],
-        "brief_id": "formaldehyde",
-        "xhs": "How-to 提问式：「一个月入住」方法论 + 收藏向",
-        "dy": "数字钩：「三个低成本除甲醛方法」步骤口播",
-        "feed": "数据感开头（检测笔读数）+ 三招快切 + 结尾入住时间承诺",
-    },
-    {
-        "id": "floor",
-        "topic": "地板清洁 / 拖地留香",
-        "signals": ["拖地", "地板", "沫檬", "水印", "留香"],
-        "pain_keys": ["效果质疑", "香味偏好"],
-        "cats": ["品牌竞品", "好物推荐"],
-        "dy_cats": ["清洁妙招"],
-        "brief_id": "floor",
-        "xhs": "好物 vlog：热水拖地 + 清洁剂，对标沫檬爆款句式",
-        "dy": "四招清洁小技巧：居家全景一镜到底",
-        "feed": "水印/留痕痛点对比 → 严选地板液一擦即净特写",
-    },
-    {
-        "id": "laundry",
-        "topic": "洗衣清洁 / 洗衣机槽污",
-        "signals": ["洗衣", "洗衣机", "凝珠", "洗衣液", "柔顺剂"],
-        "pain_keys": ["操作麻烦", "异味困扰"],
-        "cats": ["好物推荐"],
-        "dy_cats": [],
-        "brief_id": "laundry",
-        "xhs": "第一人称自述：「柔顺剂留香」生活流，评论区求链接密集",
-        "dy": "教程钩：老管家式「洗衣机要定期洗」科普口播",
-        "feed": "拆机槽污垢特写（恶心向）→ 清洗剂泡腾演示 → 洗完衣服对比",
-    },
-]
+_DIRECTION_PLAYBOOK = DIRECTION_PLAYBOOK
 
 
 def _top_pain_quote(xhs_raw: dict, keys: list) -> str:
@@ -1420,10 +1319,10 @@ def _sanitize(obj):
     return obj
 
 
-def patch_html(data: dict, window_label: str):
+def patch_html(data: dict, window_label: str, brand_count: int | None = None):
     html = HTML.read_text(encoding="utf-8")
     blob = json.dumps(_sanitize(data), ensure_ascii=False, separators=(",", ":"))
-    # lambda repl: re.sub interprets backslashes in repl strings (\\n → newline)
+    copy = format_report_copy(brand_count=brand_count or len(BRAND_CANONICAL))
     html = re.sub(
         r"const DATA = \{.*?\};",
         lambda _m: f"const DATA = {blob};",
@@ -1437,6 +1336,37 @@ def patch_html(data: dict, window_label: str):
         html,
         count=1,
     )
+    if copy.get("html_title"):
+        html = re.sub(r"<title>[^<]+</title>", f"<title>{copy['html_title']}</title>", html, count=1)
+    if copy.get("nav_title"):
+        html = re.sub(
+            r'(<aside class="sidebar">.*?<h2>)[^<]+(</h2>)',
+            rf"\g<1>{copy['nav_title']}\g<2>",
+            html,
+            count=1,
+            flags=re.S,
+        )
+    if copy.get("kicker"):
+        html = re.sub(
+            r'(<div class="kicker">)[^<]+(</div>)',
+            rf"\g<1>{copy['kicker']}\g<2>",
+            html,
+            count=1,
+        )
+    if copy.get("h1_line1") and copy.get("h1_sub"):
+        html = re.sub(
+            r'(<h1>)[^<]+(<br><span style="font-size:22px[^"]*">)[^<]+(</span></h1>)',
+            rf"\g<1>{copy['h1_line1']}\g<2>{copy['h1_sub']}\g<3>",
+            html,
+            count=1,
+        )
+    if copy.get("lead"):
+        html = re.sub(
+            r'(<p class="lead" id="docLead">)[^<]+(</p>)',
+            rf"\g<1>{copy['lead']}\g<2>",
+            html,
+            count=1,
+        )
     HTML.write_text(html, encoding="utf-8")
 
 
@@ -1495,7 +1425,7 @@ def main():
         xhs_by_title,
         dy_by_id,
     )
-    yanxuan_voice = build_yanxuan_voice(competitor_actions)
+    own_brand_voice = build_own_brand_voice(competitor_actions)
     opportunity_matrix = build_opportunity_matrix(
         directions, competitor_actions, trend_signals
     )
@@ -1523,7 +1453,7 @@ def main():
     }
     overview = build_overview(
         xhs_raw, dy_raw, xhs_block, dy_trend, dy_hall, trend_signals,
-        competitor_actions, opportunity_matrix, yanxuan_voice,
+        competitor_actions, opportunity_matrix, own_brand_voice,
         commerce_summary,
     )
     dy_out = {**dy_raw, "TREND_RANKS": dy_trend, "HALL_RANKS": dy_hall}
@@ -1535,18 +1465,18 @@ def main():
         "opportunity_matrix": opportunity_matrix,
         "scene_links": scene_links,
         "follow_candidates": follow_candidates,
-        "yanxuan_voice": yanxuan_voice,
+        "own_brand_voice": own_brand_voice,
         "directions": directions,
     }
     window = (dy_raw.get("_meta") or {}).get("window_label", "")
-    patch_html(data, window)
+    patch_html(data, window, len(BRAND_CANONICAL))
     print(
         f"✓ {HTML}  (window={window}, "
         f"competitors={len(competitor_actions)}, "
         f"opportunities={len(opportunity_matrix)}, "
         f"scene_links={len(scene_links)}, "
         f"follow={len(follow_candidates)}, "
-        f"yanxuan={yanxuan_voice.get('status')}, "
+        f"own_brand={own_brand_voice.get('status')}, "
         f"xhs_cart={commerce_summary['xhs'].get('挂品挂车', 0)}, "
         f"dy_cart={commerce_summary['dy'].get('挂品挂车', 0)})"
     )

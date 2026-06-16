@@ -142,7 +142,7 @@ def _brand_insights_from_rows(brands_rows: list[dict]) -> list[str]:
         n = tc.split("→")[0] if "→" in tc else tc
         reps = b.get("top_videos") or []
         if not reps:
-            lines.append(f"- **{name}**：本月样本无挂 tag 爆款（声量弱或走剧情号/非家清分发）")
+            lines.append(f"- **{name}**：本月样本无挂 tag 爆款（声量弱或非目标分发）")
             continue
         top = reps[0]
         title = (top.get("title") or b.get("top_title") or "")[:60]

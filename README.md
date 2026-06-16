@@ -1,94 +1,98 @@
-# 小红书 × 抖音 · 双平台爆款月报
+# 小红书 × 抖音 · 品牌内容爆款月报
 
 > 作者：[shutiao165-tech](https://github.com/shutiao165-tech)  
 > 仓库：https://github.com/shutiao165-tech/social-ecom-monthly-report
 
-用 **TikHub API** 拉取小红书 / 抖音近 30 天爆款样本，经**品类池 + 品牌池**双轨采集、商业复核与关联层计算，输出单文件 **`monthly-report.html`**（趋势榜、竞品动作板、机会矩阵、scene_links）。
+**架构与模型开源**：用 TikHub + 双池采集（品类词 + 品牌词），输出单文件 `monthly-report.html`——趋势榜、竞品动作板、机会矩阵、scene_links。
 
-默认示例赛道为**家清品类**（可 fork 后改 `scripts/brand_config.py` 监测词与竞品）。
+本仓库**不包含**任何真实品类、品牌或 SKU 数据；fork 后只需改 `config/niche_config.py`。
 
 ---
 
-## 功能一览
+## 模型概览（方案 C）
 
-| 模块 | 说明 |
+```
+┌─────────────────┐     ┌─────────────────┐
+│   品类池        │     │   品牌池        │
+│ CATEGORY_KEYWORDS│     │ BRAND_SEARCH_*  │
+│ 每词 TOP30      │     │ 每品牌 TOP3–5   │
+└────────┬────────┘     └────────┬────────┘
+         │                       │
+         └───────────┬───────────┘
+                     ▼
+            enrich_commerce（挂品/挂车）
+                     ▼
+         merge + build_unified_monthly
+                     ▼
+              monthly-report.html
+         （竞品板 · 机会矩阵 · scene_links）
+```
+
+| 层级 | 说明 |
 |------|------|
-| 双池采集 | 品类词 TOP30 + 品牌组合词代表片 |
-| 商业复核 | 挂品 / 挂车 / 品牌 tag 打标 |
-| 竞品动作板 §02 | 每品牌每平台最多 3 条代表片，有品前置 |
-| scene_links | 趋势场景 × 竞品 × SKU 关联 |
-| follow_candidates | 可跟投候选（为空则前端隐藏） |
-| Cursor Skill | `cursor-skills/social-ecom-monthly-report/` |
-
----
-
-## 环境要求
-
-- **Python** 3.10+
-- **TikHub** 付费 API Key（[tikhub.io](https://tikhub.io)）
-- **social-ecom-decoder**（本地 `douyin-pulse` CLI，见 [SETUP.md](docs/SETUP.md)）
-- **Cursor**（可选，用于 Agent Skill）
+| L1 双池 | 品类热点 vs 品牌动作，并行不混比 |
+| L2 商业 | 挂品 / 挂车 / 品牌 tag 复核 |
+| L3 关联 | scene_links、follow_candidates（可空则隐藏） |
+| L4 决策 | 竞品动作板 + 自有品牌机会矩阵 |
 
 ---
 
 ## 快速开始
 
 ```bash
-git clone https://github.com/shutiao165-tech/social-ecom-monthly-report.git ~/social-ecom-monthly-report
-cd ~/social-ecom-monthly-report
+git clone https://github.com/shutiao165-tech/social-ecom-monthly-report.git ~/brand-viral-monthly-report
+cd ~/brand-viral-monthly-report
 
-cp .env.example .env
+cp config/niche_config.example.py config/niche_config.py
+# 编辑 config/niche_config.py
+
 mkdir -p ~/.config/tikhub
 echo "YOUR_TIKHUB_KEY" > ~/.config/tikhub/key
 
-# 1) 安装上游 decoder（本地 clone 你的 social-ecom-decoder 路径）
-#    export SOCIAL_ECOM_DECODER=~/.claude/skills/social-ecom-decoder
+export SOCIAL_ECOM_DECODER=~/.claude/skills/social-ecom-decoder  # douyin-pulse 上游
 
-# 2) 改监测词 / 竞品（唯一真源）
-#    vim scripts/brand_config.py
-
-# 3) 一键月报
 bash scripts/run_monthly_pipeline.sh
 open monthly-report.html
 ```
 
-### 安装 Cursor Skill
+### Cursor Skill
 
 ```bash
 mkdir -p ~/.cursor/skills
-cp -R cursor-skills/social-ecom-monthly-report ~/.cursor/skills/
+cp -R cursor-skills/brand-viral-monthly-report ~/.cursor/skills/
 ```
 
 ---
 
-## 目录结构
+## 你需要改的唯一文件
 
-```
-├── scripts/           # 拉数、合并、写 HTML
-├── templates/         # Brief 表模板（示例，无内部 SKU）
-├── data/              # 运行产物（git 忽略）
-├── monthly-report.html
-├── cursor-skills/     # 复制到 ~/.cursor/skills/
-└── docs/
-```
+`config/niche_config.py`（从 example 复制）—— 赛道名、自有品牌、竞品、品类词、分类规则、playbook、报告文案。
+
+详见 [config/README.md](config/README.md) 与 [docs/SETUP.md](docs/SETUP.md)。
 
 ---
 
-## 隐私与数据
+## 目录
 
-- 仓库**不含**真实月报数据、`merged_raw.json` 等大文件
-- 请勿提交 `.env`、`~/.config/tikhub/key`、含内部 SKU 的 brief JSON
-- 首次运行后 `data/` 会含平台公开内容，自行决定是否归档
-
----
-
-## 相关项目
-
-- [dingtalk-stock-watch](https://github.com/shutiao165-tech/dingtalk-stock-watch) — 钉钉 A 股盯盘助手（同类开源范式）
-- social-ecom-decoder — 抖音 pulse / 小红书爆款子 skill 集合（需单独安装）
+| 路径 | 作用 |
+|------|------|
+| `config/niche_config.example.py` | 配置模板（占位品牌 BrandAlpha / CompetitorB…） |
+| `scripts/brand_config.py` | 配置加载出口（勿手改列表） |
+| `scripts/build_unified_monthly.py` | 汇总 DATA、patch HTML |
+| `monthly-report.html` | 报告壳（DATA 由 pipeline 写入） |
+| `cursor-skills/` | 复制到 `~/.cursor/skills/` |
 
 ---
 
-## License
+## 隐私
 
-MIT — 见 [LICENSE](LICENSE)
+- 不提交 `.env`、`config/niche_config.py`、`data/` 运行产物
+- 不含飞书/秒搭内链、真实 SKU brief
+
+---
+
+## 相关
+
+- [dingtalk-stock-watch](https://github.com/shutiao165-tech/dingtalk-stock-watch) — 同类开源范式（盯盘助手）
+
+MIT — [LICENSE](LICENSE)

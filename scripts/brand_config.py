@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
-"""竞品监测：品牌 canonical 名 ↔ 搜索词（XHS / DY 共用）。
-
-Fork 后请改 BRAND_CANONICAL / BRAND_SEARCH_KEYWORDS；
-示例中「网易严选」表示自有品牌，其余为家清赛道公开竞品名。
-"""
+"""品牌监测配置 — 从 config/niche_config.py 读取（唯一真源）。"""
 from __future__ import annotations
 
-BRAND_CANONICAL = [
-    "滴露", "网易严选", "沫檬", "椰放",
-    "水卫士", "晴天大白", "老管家", "蔬果园",
-]
+from load_niche import cfg, own_brand_names
 
-# canonical → 搜索词（与 douyin-pulse 品牌 run 对齐）
-BRAND_SEARCH_KEYWORDS: dict[str, list[str]] = {
-    "滴露": ["滴露", "滴露消毒液", "滴露衣物消毒"],
-    "网易严选": ["网易严选", "网易严选香氛", "网易严选家清"],
-    "沫檬": ["沫檬", "沫檬地板清洁", "沫檬地板清洁剂"],
-    "椰放": ["椰放", "椰放香薰", "椰放车载香薰"],
-    "水卫士": ["水卫士", "水卫士马桶", "水卫士管道疏通"],
-    "晴天大白": ["晴天大白", "晴天大白车载", "晴天大白车载香薰"],
-    "老管家": ["老管家", "老管家洗衣机", "老管家空调清洁"],
-    "蔬果园": ["蔬果园", "蔬果园洗洁精", "蔬果园香薰"],
-}
+_c = cfg()
+
+NICHE_LABEL = _c.NICHE_LABEL
+NICHE_SLUG = _c.NICHE_SLUG
+OWN_BRAND = _c.OWN_BRAND
+OWN_BRAND_DISPLAY = getattr(_c, "OWN_BRAND_DISPLAY", _c.OWN_BRAND)
+OWN_BRAND_ALIASES = list(getattr(_c, "OWN_BRAND_ALIASES", []) or [])
+OWN_BRAND_NAMES = own_brand_names()
+
+BRAND_CANONICAL = list(_c.BRAND_CANONICAL)
+BRAND_SEARCH_KEYWORDS: dict[str, list[str]] = dict(_c.BRAND_SEARCH_KEYWORDS)
+BRAND_SCENE_HINTS: dict[str, str] = dict(getattr(_c, "BRAND_SCENE_HINTS", {}) or {})
+DEFAULT_SCENE = getattr(_c, "DEFAULT_SCENE", "综合场景")
+
+CATEGORY_KEYWORDS = list(_c.CATEGORY_KEYWORDS)
+CONTENT_CATEGORIES = list(_c.CONTENT_CATEGORIES)
+PAIN_BUCKETS = list(_c.PAIN_BUCKETS)
+DIRECTION_PLAYBOOK = list(getattr(_c, "DIRECTION_PLAYBOOK", []) or [])
+
+DY_NICHE_CATEGORY = getattr(_c, "DY_NICHE_CATEGORY", NICHE_LABEL)
+DY_NICHE_BRAND = getattr(_c, "DY_NICHE_BRAND", "品牌竞品")
 
 
 def xhs_brand_keywords_flat() -> list[str]:
-    """去重保序，供 fetch_xhs 品牌池搜索。"""
     out: list[str] = []
     seen: set[str] = set()
     for kws in BRAND_SEARCH_KEYWORDS.values():
@@ -45,3 +47,20 @@ def canonical_for_keyword(kw: str) -> str | None:
 
 def keywords_for_brand(brand: str) -> list[str]:
     return BRAND_SEARCH_KEYWORDS.get(brand, [brand])
+
+
+def is_own_brand(name: str) -> bool:
+    n = (name or "").strip()
+    if n == OWN_BRAND or n == OWN_BRAND_DISPLAY:
+        return True
+    return any(a in n for a in OWN_BRAND_ALIASES if len(a) >= 2)
+
+
+def norm_brand_key(name: str) -> str:
+    n = (name or "").strip()
+    if is_own_brand(n):
+        return OWN_BRAND
+    for alias in sorted(OWN_BRAND_ALIASES, key=len, reverse=True):
+        if alias and alias in n:
+            return OWN_BRAND
+    return n.strip() or name

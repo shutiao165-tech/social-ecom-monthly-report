@@ -6,9 +6,9 @@ import json
 import re
 from typing import Any
 
-BRAND_KEYWORDS = [
-    "网易严选", "沫檬", "老管家", "滴露", "椰放", "蔬果园", "水卫士", "晴天大白",
-]
+from brand_config import BRAND_CANONICAL  # noqa: E402
+
+BRAND_KEYWORDS = list(BRAND_CANONICAL)
 
 _SOFT_TITLE = ("好物", "种草", "推荐", "清单", "同款", "测评", "爱用", "必买", "链接")
 _SOFT_COMMENT = ("同款商品", "笔记同款", "链接", "怎么买", "求购", "哪里买", "蹲一个", "多少钱")

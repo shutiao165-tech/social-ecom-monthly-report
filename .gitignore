@@ -16,5 +16,7 @@ archive/
 templates/brief/*.json
 !templates/brief/*.example.json
 
+config/niche_config.py
+
 # Editor
 .cursor/
