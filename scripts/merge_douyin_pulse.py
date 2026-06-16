@@ -14,7 +14,8 @@ CATEGORY_TOP_N = 30
 
 # 品牌词搜索文件名 → 归属品牌（与 brand_config 同步）
 from brand_config import BRAND_CANONICAL, BRAND_SEARCH_KEYWORDS as _BC_KWS  # noqa: E402
-from env_paths import REPORT_AUTHORS  # noqa: E402
+from env_paths import DECODER_ROOT, REPORT_AUTHORS  # noqa: E402
+from relevance_filter import mentions_brand  # noqa: E402
 
 BRAND_SEARCH_STEMS: dict[str, list[str]] = _BC_KWS
 
@@ -207,11 +208,11 @@ def _brands_from_raw_searches(
 
     def _brand_for_video(stem: str, desc: str) -> str | None:
         for b in brand_names:
-            if b in desc:
+            if mentions_brand(desc, b):
                 return b
         for b in brand_names:
             stems = BRAND_SEARCH_STEMS.get(b, [b])
-            if any(s in stem for s in stems) and b in desc:
+            if any(s in stem for s in stems) and mentions_brand(desc, b):
                 return b
         return None
 
@@ -236,10 +237,79 @@ def _brands_from_raw_searches(
 
 
 def _pulse_raw_dirs(limit: int = 4) -> list[Path]:
-    root = Path.home() / ".claude/skills/social-ecom-decoder/output"
+    root = DECODER_ROOT / "output"
     if not root.exists():
         return []
     return sorted(root.glob("*/douyin-pulse/raw"), reverse=True)[:limit]
+
+
+def refresh_dy_brand_markdown(rows: list, old_insights: list | None = None) -> tuple[list[str], list[str]]:
+    """从过滤后的 brands 行重算 brand_insights / competitor_summary。"""
+    insights = _brand_insights_from_rows(rows)
+    extra = [
+        line for line in (old_insights or [])
+        if isinstance(line, str) and (line.startswith("[视频向]") or line.startswith("[产品向]"))
+    ]
+    insights = (insights + extra)[:8]
+    return insights, list(insights)
+
+
+def sanitize_dy_brand_rows(rows: list) -> list:
+    """对已合并的 brands 行做相关性过滤（无 pulse raw 时的兜底）。"""
+    out: list[dict] = []
+    for b in rows or []:
+        brand = b.get("brand", "")
+        if not brand:
+            continue
+        hits: list[dict] = []
+        for v in b.get("top_videos") or []:
+            desc = v.get("title") or ""
+            if not mentions_brand(desc, brand):
+                continue
+            dur_s = 0.0
+            if isinstance(v.get("duration"), str) and v["duration"].endswith("s"):
+                try:
+                    dur_s = float(v["duration"][:-1])
+                except ValueError:
+                    dur_s = 0.0
+            hits.append({
+                "desc": desc,
+                "digg_count": int(v.get("likes") or 0),
+                "duration_ms": int(dur_s * 1000),
+                "aweme_id": v.get("aweme_id", ""),
+                "author_follower_count": 0,
+            })
+        top_title = b.get("top_title") or ""
+        if not hits and top_title and not str(top_title).startswith("（本批"):
+            if mentions_brand(top_title, brand):
+                dur_s = 0.0
+                if isinstance(b.get("duration"), str) and b["duration"].endswith("s"):
+                    try:
+                        dur_s = float(b["duration"][:-1])
+                    except ValueError:
+                        dur_s = 0.0
+                hits.append({
+                    "desc": top_title,
+                    "digg_count": int(b.get("top_likes_n") or 0),
+                    "duration_ms": int(dur_s * 1000),
+                    "aweme_id": b.get("aweme_id", ""),
+                    "author_follower_count": 0,
+                })
+        if hits:
+            out.append(_brand_row_from_hit(brand, hits))
+        else:
+            out.append({
+                "brand": brand,
+                "tag_count": "0→0",
+                "top_title": f"（本批样本：标题/描述未出现「{brand}」）",
+                "top_likes": "—",
+                "top_likes_n": 0,
+                "duration": "—",
+                "fans": "—",
+                "data_scope": "品牌词搜索·标题/描述须含品牌名（已过滤搜索噪声）",
+                "top_videos": [],
+            })
+    return out
 
 
 def rebuild_dy_brands(brand_analysis: dict, brand_names: list, raw_dir: Path | None = None) -> list:
@@ -248,7 +318,7 @@ def rebuild_dy_brands(brand_analysis: dict, brand_names: list, raw_dir: Path | N
     for m in brand_analysis.get("top30") or []:
         desc = m.get("desc") or ""
         for b in brand_names:
-            if b in desc:
+            if mentions_brand(desc, b):
                 pulse_hits[b].append(m)
                 break
 
@@ -265,7 +335,7 @@ def rebuild_dy_brands(brand_analysis: dict, brand_names: list, raw_dir: Path | N
             old = merged.get(key)
             if not old or v.get("digg_count", 0) > old.get("digg_count", 0):
                 merged[key] = v
-        hits = list(merged.values())
+        hits = [v for v in merged.values() if mentions_brand(v.get("desc") or "", b)]
         if hits:
             rows.append(_brand_row_from_hit(b, hits))
         else:
@@ -278,6 +348,7 @@ def rebuild_dy_brands(brand_analysis: dict, brand_names: list, raw_dir: Path | N
                 "duration": "—",
                 "fans": "—",
                 "data_scope": "品牌词搜索·标题/描述须含品牌名（已过滤搜索噪声）",
+                "top_videos": [],
             })
     return rows
 
@@ -288,7 +359,7 @@ def _brands_from_pulse(brand_analysis: dict, brand_names: list) -> list:
 
 
 def _find_latest_pulse_raw() -> Path | None:
-    root = Path.home() / ".claude/skills/social-ecom-decoder/output"
+    root = DECODER_ROOT / "output"
     if not root.exists():
         return None
     cands = sorted(root.glob("*/douyin-pulse/raw"), reverse=True)

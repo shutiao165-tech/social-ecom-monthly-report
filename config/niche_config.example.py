@@ -29,6 +29,26 @@ BRAND_SEARCH_KEYWORDS: dict[str, list[str]] = {
     "CompetitorD": ["CompetitorD"],
 }
 
+# 抖音歧义品牌：裸词易命中非赛道内容；pulse 仅用组合词（见 dy_brand_keywords_csv）
+BRAND_DY_AMBIGUOUS: list[str] = []  # 例：["CompetitorB"]
+
+# 可选：内容相关性过滤（XHS + DY 共用；不配则仅做品牌名/hashtag 校验）
+NICHE_STRONG_ANCHORS: list[str] = []  # 例：赛道强锚词
+NICHE_WEAK_ANCHORS: list[str] = []
+NICHE_NEGATIVE_TERMS: list[str] = []  # 命中且无强锚点时丢弃
+BRANDS_REQUIRING_STRONG_ANCHOR: list[str] = []  # 歧义品牌须共现强锚词
+BRAND_CONTEXT_REQUIRED: dict[str, list[str]] = {}  # 例：{"CompetitorB": ["产品线", "系列"]}
+
+# 竞品动作板：舆情 / 行业资讯分流（默认开启）
+ENABLE_SENTIMENT_LANE = True
+ENABLE_NEWS_LANE = True
+
+# SKU 识别规则（product_line 推断；空列表则仅靠挂品字段）
+SKU_RULES: list[tuple[str, list[str]]] = [
+    ("示例 SKU A", ["关键词A", "关键词A2"]),
+    ("示例 SKU B", ["关键词B"]),
+]
+
 # 竞品动作板：品牌 → 主战场场景标签（可选，缺省为 DEFAULT_SCENE）
 BRAND_SCENE_HINTS: dict[str, str] = {
     "CompetitorB": "场景A",

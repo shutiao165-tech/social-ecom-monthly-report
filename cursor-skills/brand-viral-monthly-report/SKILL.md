@@ -39,9 +39,11 @@ cp -R ~/brand-viral-monthly-report/cursor-skills/brand-viral-monthly-report ~/.c
 - `BRAND_CANONICAL` + `BRAND_SEARCH_KEYWORDS` — 监测竞品
 - `CATEGORY_KEYWORDS` — 品类池搜索词
 - `DIRECTION_PLAYBOOK` — 机会矩阵话题（可选整表替换）
+- `BRAND_DY_AMBIGUOUS` / `NICHE_*_ANCHORS` — 歧义品牌与噪声过滤（v0.2+，见 CHANGELOG）
 
 TikHub Key：`~/.config/tikhub/key` · 注册 [user.tikhub.io/register?ref=YS1mhMDA](https://user.tikhub.io/register?ref=YS1mhMDA)（推荐码 **YS1mhMDA**）  
-抖音 pulse：`SOCIAL_ECOM_DECODER` 指向 social-ecom-decoder
+抖音 pulse：`SOCIAL_ECOM_DECODER` 指向 social-ecom-decoder  
+抖音品牌池关键词：`python3 -c "from scripts.brand_config import dy_brand_keywords_csv; print(dy_brand_keywords_csv())"`
 
 ## 流水线
 
@@ -57,7 +59,9 @@ bash scripts/run_monthly_pipeline.sh
 
 1. **双池不混比**：品类 UGC 爆款 ≠ 品牌代表片赞数
 2. **品牌命中**：标题/正文含品牌名或搜索词；禁止仅凭入库标签
-3. **竞品板**：每品牌每平台最多 3 条代表片，有品优先
-4. **follow_candidates 为空** → 前端隐藏该板块
+3. **歧义品牌**（v0.2）：`BRAND_DY_AMBIGUOUS` + `relevance_filter` 过滤 DY/XHS 噪声
+4. **舆情分流**（v0.2）：种草代表片与舆情/资讯分开展示
+5. **竞品板**：每品牌每平台最多 3 条代表片，有品优先
+6. **follow_candidates 为空** → 前端隐藏该板块
 
-详细见仓库 `README.md`。
+详细见仓库 `README.md` · 版本记录见 `CHANGELOG.md`。

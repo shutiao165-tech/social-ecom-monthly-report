@@ -230,6 +230,12 @@ td.author{color:var(--muted);font-size:12px;max-width:140px;overflow:hidden;text
 .tag.commerce-coop{background:#f3e8ff;color:#6b21a8}
 .tag.commerce-soft{background:var(--paper-tint);color:var(--muted)}
 .tag.commerce-brand{background:#e8f0fe;color:#1d4ed8}
+.tag.sentiment{background:#fde8e8;color:#b42318;font-weight:600}
+.tag.news{background:#e8f0fe;color:#1d4ed8;font-weight:600}
+.rep-sentiment{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(180,35,24,.25)}
+.rep-sentiment .comp-meta{color:#b42318}
+.rep-news{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(29,78,216,.25)}
+.rep-news .comp-meta{color:#1d4ed8}
 
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 
@@ -673,12 +679,15 @@ function renderOverview(){
 function renderCompetitors(){
   const rows = DATA.competitor_actions || [];
   const clipHasProduct = c => !!(c?.product_line || c?.commerce_type === '已挂商品' || (c?.product_names||[]).length);
-  const orderClips = list => [...list].sort((a,b)=>{
+  const orderClips = list => [...list]
+    .filter(c => c.content_lane !== 'sentiment' && c.action_type !== '舆情'
+      && c.content_lane !== 'news' && c.action_type !== '资讯')
+    .sort((a,b)=>{
     const ap = clipHasProduct(a)?1:0, bp = clipHasProduct(b)?1:0;
     if(bp!==ap) return bp-ap;
     return (b.likes||0)-(a.likes||0);
   }).slice(0,3);
-  const repCell = (clip) => {
+  const repCell = (clip, {sentiment=false, news=false} = {}) => {
     if(!clip) return '';
     if((clip.title_raw||'').startsWith('（本批样本') || clip.title_clean === '（无标题）' && !clip.likes){
       return `<div class="comp-empty">${clip.title_raw || '本批未命中'}</div>`;
@@ -687,6 +696,10 @@ function renderCompetitors(){
       ? `<div class="comp-product">${clip.product_line}</div>` : '';
     const title = clip.title_clean || clip.title || '';
     const raw = (clip.title_raw || title).replace(/"/g,'&quot;');
+    const laneTag = sentiment || clip.content_lane === 'sentiment' || clip.action_type === '舆情'
+      ? '<span class="tag sentiment">舆情</span>'
+      : (news || clip.content_lane === 'news' || clip.action_type === '资讯'
+        ? '<span class="tag news">资讯</span>' : '');
     const meta = [
       clip.rank ? `#${clip.rank}` : '',
       `${clip.likes_label||clip.likes||0} 赞`,
@@ -694,14 +707,23 @@ function renderCompetitors(){
       clip.duration || '',
       commerceBadge(clip),
     ].filter(Boolean).join(' · ');
-    return `<div class="comp-clip">${product}<div class="comp-title" title="${raw}">${title}</div><div class="comp-meta">${meta}</div></div>`;
+    const cls = sentiment ? 'comp-clip-sentiment' : (news ? 'comp-clip-news' : '');
+    return `<div class="comp-clip ${cls}">${product}<div class="comp-title" title="${raw}">${title}</div><div class="comp-meta">${laneTag}${laneTag?' · ':''}${meta}</div></div>`;
   };
   const repsCell = (platform, listKey, inactiveNote) => {
     if(inactiveNote) return `<div class="comp-empty">${inactiveNote}</div>`;
     const raw = platform?.[listKey] || [];
     const clips = orderClips(raw.length ? raw : (platform ? [platform] : []));
-    if(!clips.length) return `<div class="comp-empty">本批未命中</div>`;
-    return `<div class="rep-stack">${clips.map(repCell).join('')}</div>`;
+    const sentiment = (platform?.sentiment_notes || []).slice(0, 1);
+    const news = (platform?.news_notes || []).slice(0, 1);
+    if(!clips.length && !sentiment.length && !news.length) return `<div class="comp-empty">本批未命中</div>`;
+    const mainHtml = clips.length
+      ? `<div class="rep-stack">${clips.map(c => repCell(c)).join('')}</div>` : '';
+    const sentHtml = sentiment.length
+      ? `<div class="rep-sentiment">${sentiment.map(s => repCell(s, {sentiment:true})).join('')}</div>` : '';
+    const newsHtml = news.length
+      ? `<div class="rep-news">${news.map(s => repCell(s, {news:true})).join('')}</div>` : '';
+    return mainHtml + sentHtml + newsHtml;
   };
   document.querySelector('#competitorTable tbody').innerHTML = rows.map(r=>{
     const xhsInactive = !r.xhs && r.xhs_likes === 0;

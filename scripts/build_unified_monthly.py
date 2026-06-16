@@ -15,7 +15,7 @@ from commerce_detect import (  # noqa: E402
     merge_commerce_record,
     summarize_commerce,
 )
-from competitor_enrich import enrich_clip  # noqa: E402
+from competitor_enrich import enrich_clip, is_public_sentiment, is_industry_news  # noqa: E402
 from brand_config import (  # noqa: E402
     BRAND_CANONICAL,
     BRAND_SCENE_HINTS,
@@ -32,12 +32,20 @@ from brand_config import (  # noqa: E402
 )
 from env_paths import HTML_OUTPUT  # noqa: E402
 from load_niche import format_report_copy  # noqa: E402
+from relevance_filter import mentions_brand as _text_mentions_brand  # noqa: E402
 
 try:
-    from merge_douyin_pulse import rebuild_dy_brands, _find_latest_pulse_raw  # noqa: E402
+    from merge_douyin_pulse import (  # noqa: E402
+        rebuild_dy_brands,
+        sanitize_dy_brand_rows,
+        refresh_dy_brand_markdown,
+        _find_latest_pulse_raw,
+    )
     from scene_linkage import build_scene_links, build_follow_candidates  # noqa: E402
 except ImportError:
     rebuild_dy_brands = None
+    sanitize_dy_brand_rows = None
+    refresh_dy_brand_markdown = None
     _find_latest_pulse_raw = lambda: None
     build_scene_links = None
     build_follow_candidates = None
@@ -141,12 +149,21 @@ def _clip_has_product(c: dict) -> bool:
     )
 
 
+def _is_sentiment_clip(c: dict) -> bool:
+    return c.get("content_lane") == "sentiment" or c.get("action_type") == "舆情"
+
+
+def _is_news_clip(c: dict) -> bool:
+    return c.get("content_lane") == "news" or c.get("action_type") == "资讯"
+
+
 def _order_rep_clips(clips: list, limit: int = REP_CLIP_TOP) -> list:
-    """展示序：有单品/挂品优先，同档按赞数。"""
+    """展示序：排除舆情/资讯；有单品/挂品优先，同档按赞数。"""
     if not clips:
         return []
+    content = [c for c in clips if not _is_sentiment_clip(c) and not _is_news_clip(c)]
     ordered = sorted(
-        clips,
+        content,
         key=lambda c: (1 if _clip_has_product(c) else 0, c.get("likes", 0) or 0),
         reverse=True,
     )[:limit]
@@ -170,11 +187,27 @@ def _enrich_platform_clip(
     category: str = "",
     rank: int = 1,
     aweme_id: str = "",
+    content_excerpt: str = "",
+    author_nickname: str = "",
 ) -> dict:
     return enrich_clip(
         title, brand, commerce, platform,
         likes=likes, likes_label=likes_label, duration=duration,
         category=category, rank=rank, aweme_id=aweme_id,
+        content_excerpt=content_excerpt, author_nickname=author_nickname,
+    )
+
+
+def _enrich_note_clip(note: dict, brand: str, comm: dict, rank: int) -> dict:
+    title = (note.get("title") or "")[:160]
+    return _enrich_platform_clip(
+        title, brand, comm, "xiaohongshu",
+        likes=note.get("likes", 0),
+        likes_label=_fmt(note.get("likes", 0)),
+        category=note.get("category", ""),
+        rank=rank,
+        content_excerpt=note.get("content_excerpt") or "",
+        author_nickname=note.get("author_nickname") or "",
     )
 
 
@@ -559,29 +592,65 @@ XHS_BRAND_NAMES = BRAND_CANONICAL
 def _note_mentions_brand(note: dict, name: str) -> bool:
     """标题/正文/话题须出现品牌名或该品牌组合搜索词；禁止仅凭 keywords_matched 入库标签认定。"""
     text = f"{note.get('title') or ''} {note.get('content_excerpt') or ''}"
-    if name in text:
-        return True
     if is_own_brand(name):
-        return any(a in text for a in OWN_BRAND_ALIASES if a)
-    for kw in keywords_for_brand(name):
-        if kw != name and kw in text:
-            return True
-    return False
+        plain = text
+        if name in plain or any(a in plain for a in OWN_BRAND_ALIASES if a):
+            return _text_mentions_brand(text, name) if _has_relevance_config() else True
+    return _text_mentions_brand(text, name)
+
+
+def _has_relevance_config() -> bool:
+    from relevance_filter import _has_relevance_config as _hr
+    return _hr()
 
 
 def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None) -> list:
-    """品牌池：每品牌 TOP1 代表笔记（标题/正文含品牌名）。"""
+    """品牌池：每品牌种草代表笔记（标题/正文含品牌名；舆情/资讯单独分流）。"""
     xhs_by_title = xhs_by_title or {}
     notes = merged_raw.get("notes") or []
     brands = []
     for name in XHS_BRAND_NAMES:
         display = OWN_BRAND_DISPLAY if is_own_brand(name) else name
         hits = [n for n in notes if _note_mentions_brand(n, name)]
-        hits.sort(key=lambda x: x.get("likes", 0), reverse=True)
-        top_notes_raw = hits[:5]
-        if not top_notes_raw:
+        content_hits = [
+            n for n in hits
+            if not is_public_sentiment(
+                n.get("title") or "",
+                n.get("content_excerpt") or "",
+                n.get("author_nickname") or "",
+            )
+            and not is_industry_news(
+                n.get("title") or "",
+                n.get("content_excerpt") or "",
+                n.get("author_nickname") or "",
+            )
+        ]
+        sentiment_hits = [
+            n for n in hits
+            if is_public_sentiment(
+                n.get("title") or "",
+                n.get("content_excerpt") or "",
+                n.get("author_nickname") or "",
+            )
+        ]
+        news_hits = [
+            n for n in hits
+            if (not is_public_sentiment(
+                n.get("title") or "",
+                n.get("content_excerpt") or "",
+                n.get("author_nickname") or "",
+            )) and is_industry_news(
+                n.get("title") or "",
+                n.get("content_excerpt") or "",
+                n.get("author_nickname") or "",
+            )
+        ]
+        content_hits.sort(key=lambda x: x.get("likes", 0), reverse=True)
+        sentiment_hits.sort(key=lambda x: x.get("likes", 0), reverse=True)
+        news_hits.sort(key=lambda x: x.get("likes", 0), reverse=True)
+        if not hits:
             brands.append({
-                "brand": _norm_brand_key(name),
+                "brand": norm_brand_key(name),
                 "display": display,
                 "active": False,
                 "note": "本批样本未命中（标题/正文须含品牌名）",
@@ -590,24 +659,35 @@ def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None
                 "title": "—",
                 "count": 0,
                 "top_notes": [],
-                "data_scope": "642 条合并池内检索；品牌词搜索噪声已过滤",
+                "sentiment_notes": [],
+                "news_notes": [],
+                "data_scope": "合并池内检索；品牌词搜索噪声已过滤",
             })
             continue
         top_notes = []
-        for i, n in enumerate(top_notes_raw):
+        for i, n in enumerate(content_hits[:5]):
             title = n.get("title", "")[:160]
             comm = n.get("commerce") or xhs_by_title.get(_title_key(title)) or {}
             if not comm.get("commerce_type"):
                 comm = merge_commerce_record("xhs", {}, title, n.get("top_comments") or [])
-            top_notes.append(_enrich_platform_clip(
-                title, norm_brand_key(name), comm, "xiaohongshu",
-                likes=n.get("likes", 0),
-                likes_label=_fmt(n.get("likes", 0)),
-                category=n.get("category", ""),
-                rank=i + 1,
-            ))
-        best = top_notes_raw[0]
-        lead = top_notes[0]
+            top_notes.append(_enrich_note_clip(n, norm_brand_key(name), comm, i + 1))
+        sentiment_notes = []
+        for i, n in enumerate(sentiment_hits[:2]):
+            title = n.get("title", "")[:160]
+            comm = n.get("commerce") or xhs_by_title.get(_title_key(title)) or {}
+            if not comm.get("commerce_type"):
+                comm = merge_commerce_record("xhs", {}, title, n.get("top_comments") or [])
+            sentiment_notes.append(_enrich_note_clip(n, norm_brand_key(name), comm, i + 1))
+        news_notes = []
+        for i, n in enumerate(news_hits[:2]):
+            title = n.get("title", "")[:160]
+            comm = n.get("commerce") or xhs_by_title.get(_title_key(title)) or {}
+            if not comm.get("commerce_type"):
+                comm = merge_commerce_record("xhs", {}, title, n.get("top_comments") or [])
+            news_notes.append(_enrich_note_clip(n, norm_brand_key(name), comm, i + 1))
+        rep_hits = content_hits or sentiment_hits
+        best = rep_hits[0]
+        lead = top_notes[0] if top_notes else (sentiment_notes[0] if sentiment_notes else {})
         brands.append({
             "brand": norm_brand_key(name),
             "display": display,
@@ -617,9 +697,11 @@ def build_xhs_brands_from_raw(merged_raw: dict, xhs_by_title: dict | None = None
             "likes_n": best.get("likes", 0),
             "cat": best.get("category", ""),
             "title": lead.get("title_clean") or (best.get("title") or "")[:72],
-            "note": "",
+            "note": "本批无种草代表片，仅舆情声量" if sentiment_hits and not content_hits else "",
             "data_scope": "标题/正文含品牌名（合并池检索）",
             "top_notes": top_notes,
+            "sentiment_notes": sentiment_notes,
+            "news_notes": news_notes,
         })
     return brands
 
@@ -757,8 +839,14 @@ def build_competitor_actions(
             entry["active"] = True
             entry["xhs_likes"] = likes
             top_notes = b.get("top_notes") or []
+            sentiment_notes = b.get("sentiment_notes") or []
+            news_notes = b.get("news_notes") or []
             if top_notes and top_notes[0].get("title_clean"):
                 lead = top_notes[0]
+            elif sentiment_notes:
+                lead = sentiment_notes[0]
+            elif news_notes:
+                lead = news_notes[0]
             else:
                 title = b.get("title", "")[:160]
                 xhs_comm = xhs_by_title.get(_title_key(title)) or merge_commerce_record("xhs", {}, title)
@@ -768,7 +856,7 @@ def build_competitor_actions(
                     category=b.get("cat", ""),
                 )
             top_notes = _order_rep_clips(top_notes, REP_CLIP_TOP)
-            entry["xhs"] = {
+            xhs_payload = {
                 **lead,
                 "scene": b.get("cat", "") or lead.get("category", ""),
                 "count": b.get("count", 0),
@@ -776,6 +864,11 @@ def build_competitor_actions(
                 "data_scope": b.get("data_scope", "标题/正文含品牌名"),
                 "top_notes": top_notes,
             }
+            if sentiment_notes:
+                xhs_payload["sentiment_notes"] = sentiment_notes[:2]
+            if news_notes:
+                xhs_payload["news_notes"] = news_notes[:2]
+            entry["xhs"] = xhs_payload
 
     for b in dy_brands or []:
         key = _norm_brand_key(b.get("brand", ""))
@@ -1390,6 +1483,14 @@ def main():
             if not names:
                 names = list(BRAND_CANONICAL)
             dy_raw["brands"] = rebuild_dy_brands(brand_pulse, names, pulse_raw)
+    if sanitize_dy_brand_rows:
+        dy_raw["brands"] = sanitize_dy_brand_rows(dy_raw.get("brands") or [])
+    if refresh_dy_brand_markdown:
+        insights, summary = refresh_dy_brand_markdown(
+            dy_raw.get("brands") or [], dy_raw.get("brand_insights")
+        )
+        dy_raw["brand_insights"] = insights
+        dy_raw["competitor_summary"] = summary
     xhs_by_title = {}
     merged_raw = {}
     if XHS_RAW.exists():

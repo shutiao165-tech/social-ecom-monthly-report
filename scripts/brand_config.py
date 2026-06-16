@@ -26,6 +26,13 @@ DIRECTION_PLAYBOOK = list(getattr(_c, "DIRECTION_PLAYBOOK", []) or [])
 DY_NICHE_CATEGORY = getattr(_c, "DY_NICHE_CATEGORY", NICHE_LABEL)
 DY_NICHE_BRAND = getattr(_c, "DY_NICHE_BRAND", "品牌竞品")
 
+BRAND_DY_AMBIGUOUS: frozenset[str] = frozenset(
+    getattr(_c, "BRAND_DY_AMBIGUOUS", []) or []
+)
+
+ENABLE_SENTIMENT_LANE = bool(getattr(_c, "ENABLE_SENTIMENT_LANE", True))
+ENABLE_NEWS_LANE = bool(getattr(_c, "ENABLE_NEWS_LANE", True))
+
 
 def xhs_brand_keywords_flat() -> list[str]:
     out: list[str] = []
@@ -36,6 +43,24 @@ def xhs_brand_keywords_flat() -> list[str]:
                 seen.add(kw)
                 out.append(kw)
     return out
+
+
+def dy_brand_keywords_flat() -> list[str]:
+    """抖音品牌池 pulse：歧义品牌跳过裸词，仅用品牌×品类组合。"""
+    out: list[str] = []
+    seen: set[str] = set()
+    for brand, kws in BRAND_SEARCH_KEYWORDS.items():
+        for kw in kws:
+            if brand in BRAND_DY_AMBIGUOUS and kw == brand:
+                continue
+            if kw not in seen:
+                seen.add(kw)
+                out.append(kw)
+    return out
+
+
+def dy_brand_keywords_csv() -> str:
+    return ",".join(dy_brand_keywords_flat())
 
 
 def canonical_for_keyword(kw: str) -> str | None:
