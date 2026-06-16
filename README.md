@@ -11,6 +11,8 @@
 
 本仓库**不包含**任何真实品类、品牌或 SKU 数据；fork 后只需改 `config/niche_config.py`。
 
+tikhub邀请链接：https://user.tikhub.io/register?ref=YS1mhMDA
+
 ---
 
 ## 文档（建议先看）
