@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3 — 2026-06-17
+
+### Added
+
+- `scripts/push_monthly_feishu.py` — 从 HTML 月报提取摘要，经 `lark-cli` 推送飞书互动卡片
+- `scripts/feishu_push_config.example.json` — 推送配置模板（`feishu_push_config.json` 本地使用，已 gitignore）
+
 ## v0.2 — 2026-06-16
 
 对齐内部多赛道生产环境的核心过滤与分流能力，仍**不含**任何真实监测词表或运行数据。

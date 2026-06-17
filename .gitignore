@@ -18,5 +18,9 @@ templates/brief/*.json
 
 config/niche_config.py
 
+# Feishu push (local credentials / open_id / miaoda ids)
+scripts/feishu_push_config.json
+scripts/.tmp/
+
 # Editor
 .cursor/

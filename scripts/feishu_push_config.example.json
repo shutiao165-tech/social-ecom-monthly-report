@@ -1,0 +1,22 @@
+{
+  "_comment": "复制为 feishu_push_config.json 后填写；真实配置勿提交 Git",
+  "lark_profile": "your-lark-cli-profile",
+  "identity": "bot",
+  "default_user_open_id": "ou_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "default_user_name": "Your Name",
+  "_push_note": "默认私聊 default_user；推群仅在你确认格式后通过 --chat-id 指定",
+  "miaoda_base": "https://your-miaoda-host.example.com/preview/",
+  "categories": {
+    "default": {
+      "project_dir": ".",
+      "html_file": "monthly-report.html",
+      "emoji": "📊",
+      "title": "品牌月报",
+      "hero_label": "月报首屏",
+      "hero_img_key": "img_v3_xxxxxx_upload_via_lark_im_image",
+      "header_template": "green",
+      "miaoda_file_id": "00000000-0000-0000-0000-000000000000",
+      "self_brand_label": "自有品牌"
+    }
+  }
+}

@@ -6,7 +6,7 @@
 
 本仓库开源的是**方法论 + 报告模板 + 自动化流水线**；不含任何真实赛道词表或业务数据，fork 后自行配置即可复用。
 
-**当前版本 v0.2**（2026-06）· 变更记录见 [CHANGELOG.md](CHANGELOG.md)
+**当前版本 v0.3**（2026-06）· 变更记录见 [CHANGELOG.md](CHANGELOG.md)
 
 TikHub 注册（邀请）：https://user.tikhub.io/register?ref=YS1mhMDA
 
